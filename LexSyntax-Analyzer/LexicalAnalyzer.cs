@@ -12,7 +12,7 @@ namespace LexSyntax_Analyzer
     {
         private static char [] Separators = ",()+-*/%^ \t\n\r".ToCharArray();
         protected static readonly string RNum = @"^[\d]*\.?[\d]+([eE][-+][\d]+)?";
-        protected static readonly string RName = @"^[A-Za-z]{1}[_A-Z0-9a-z]+";
+        protected static readonly string RName = @"^[A-Za-z]{1}[_A-Z0-9a-z]*";
         //protected readonly Regex RegNum = new Regex(@"^[-]?[\d]*\.?[\d]+([eE][-+][\d]+)?");
         //protected readonly Regex RegName = new Regex(@"^[A-Za-z]{1}[_A-Z0-9a-z]+\(?");
         public List<Token> Tokens { get; private set; } = new();
@@ -121,7 +121,7 @@ namespace LexSyntax_Analyzer
                     }
                 }
 
-                Debug.WriteLine($"Token {Tokens[Tokens.Count - 1].Category}: '{Tokens[Tokens.Count - 1].Value}'");
+                //Debug.WriteLine($"Token {Tokens[Tokens.Count - 1].Category}: '{Tokens[Tokens.Count - 1].Value}'");
             }
         }
     }
