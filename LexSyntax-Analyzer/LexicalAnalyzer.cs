@@ -13,8 +13,6 @@ namespace LexSyntax_Analyzer
         private static char [] Separators = ",()+-*/%^ \t\n\r".ToCharArray();
         protected static readonly string RNum = @"^[\d]*\.?[\d]+([eE][-+][\d]+)?";
         protected static readonly string RName = @"^[A-Za-z]{1}[_A-Z0-9a-z]*";
-        //protected readonly Regex RegNum = new Regex(@"^[-]?[\d]*\.?[\d]+([eE][-+][\d]+)?");
-        //protected readonly Regex RegName = new Regex(@"^[A-Za-z]{1}[_A-Z0-9a-z]+\(?");
         public List<Token> Tokens { get; private set; } = new();
         public List<Exception> Errors { get; protected set; } = new();
         public string Expression { get; protected set; }
@@ -37,11 +35,8 @@ namespace LexSyntax_Analyzer
             {
                 NumMatch = RegNum.Match(Expression.Substring(i));
                 NameMatch = RegName.Match(Expression.Substring(i));
-                //Debug.WriteLine($"{i}: {Match}");
-                //Debug.WriteLine($"{i}: {CharArray[i]}");
                 if (NumMatch.Success)
                 {
-                    //Debug.WriteLine($"NUMBER {i}: {NumMatch}");
                     if ((i + NumMatch.Length < CharArray.Length && !Separators.Contains(CharArray[i + NumMatch.Length])))
                     {
                         int Begin = i + NumMatch.Length;
@@ -66,7 +61,6 @@ namespace LexSyntax_Analyzer
                 }
                 else if (NameMatch.Success)
                 {
-                    //Debug.WriteLine($"NAME {i}: {NameMatch}");
                     if (i + NameMatch.Length < CharArray.Length && !Separators.Contains(CharArray[i + NameMatch.Length]))
                     {
                         int Begin = i + NameMatch.Length;
@@ -75,19 +69,9 @@ namespace LexSyntax_Analyzer
                         {
                             End++;
                         }
-                        /*if (Begin == End - 1)
-                        {
-                            Errors.Add(new FormatException($"Character #{i + NameMatch.Length} ('{CharArray[i + NameMatch.Length]}') is not a valid separator"));
-                        }
-                        else if (Begin == End - 1) {
-                        {
-                            Errors.Add(new FormatException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]"));
-                            Tokens.Add(new Token(Expression[i..End], "unknown", i));
-                        }*/
                         Errors.Add(new FormatException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]"));
                         Tokens.Add(new Token(Expression[i..End], "unknown", i));
                         i = End - 1;
-                        //Errors.Add(new FormatException($"Character #{i + NameMatch.Length} ('{CharArray[i + NameMatch.Length]}') is not a valid separator"));
                     } else {
                         Tokens.Add(new Token(NameMatch.Value, "name", i));
                     }
@@ -95,33 +79,35 @@ namespace LexSyntax_Analyzer
                 } 
                 else if (i < CharArray.Length)
                 {
-                    if ('(' == CharArray[i])
+                    /*if ('(' == CharArray[i])
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "bracket open", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), "op parentheses open", i));
                     }
                     else if (')' == CharArray[i])
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "bracket close", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), "op parentheses close", i));
+                    }*/
+                    if ("()".Contains(CharArray[i]))
+                    {
+                        Tokens.Add(new Token(CharArray[i].ToString(), "op parentheses", i));
                     }
                     else if ('^' == CharArray[i])
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op power", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), "op high power", i));
                     }
                     else if ("*%/".Contains(CharArray[i]))
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op mult", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), "op high mult", i));
                     }
                     else if ("+-".Contains(CharArray[i]))
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op add", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), "op low add", i));
                     }
                     else if (',' == CharArray[i])
                     {
                         Tokens.Add(new Token(CharArray[i].ToString(), "op sep", i));
                     }
                 }
-
-                //Debug.WriteLine($"Token {Tokens[Tokens.Count - 1].Category}: '{Tokens[Tokens.Count - 1].Value}'");
             }
         }
     }

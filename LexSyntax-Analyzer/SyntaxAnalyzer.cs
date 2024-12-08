@@ -22,8 +22,8 @@ namespace LexSyntax_Analyzer
             {@"\/", "division operator"},
             {@"\%", "mod division operator"},
             {@"\^", "power operator"},
-            {@"\(", "opening bracket"},
-            {@"\)", "closing bracket"}
+            {@"\(", "opening parentheses"},
+            {@"\)", "closing parentheses"}
         };
         public SyntaxAnalyzer(string Expression): base(Expression)
         {
@@ -32,265 +32,307 @@ namespace LexSyntax_Analyzer
             {
                 continue;
             }
-            //TokenEnumerator = Tokens.GetEnumerator();
             int Index = 0;
-            //while (Index < Tokens.Count)
-            //{
-            ParseSyntax(ref Index);
-            //}
+            int OpenParentheses = 0;
+            ParseSyntax(ref Index, ref OpenParentheses);
         }
 
-        private bool ParseSyntax(ref int Index)
+        private bool ParseSyntax(ref int Index, ref int OpenParentheses)
         {
-            //bool Result = false;
+            int SignIndex = Index;
             bool Sign = false;
             while (Tokens[Index].Category == "unknown")
             {
                 AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' unknown token, expected a number instead on index {Tokens[Index].Index}");
                 Index++;
             }
-            if ("+-".Contains(Tokens[Index].Value))
-            {
-                Sign = true;
-                ++Index;
-            }
-            bool Expression = ParseExpression(ref Index);
-            if (!Expression)
-            {
-                /*if (Sign)
-                {
-                    //AddError(Tokens[Index], "after operator");
-                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected identifier or expression instead on index {Tokens[Index].Index}");
-                    Index++;
-                    //Index++;
-                }
-                else
-                {
-                    return false;
-                }*/
-                if (Sign)
-                {
-                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected identifier or expression instead on index {Tokens[Index].Index}");
-                }
-                return false;
-            }
-
-            while (Index < Tokens.Count)
-            {
-                Sign = false;
-                if ("+-".Contains(Tokens[Index].Value))
+            //if ("+-".Contains(Tokens[Index].Value))
+            try {
+                if (Tokens[Index].Category.StartsWith("op low"))
                 {
                     Sign = true;
                     ++Index;
-                }
-                Expression = ParseExpression(ref Index);
+                }/* else if (Tokens[Index].Category.StartsWith("op"))
+                {
+                    AddError(Tokens[Index], $"Redundant {"{0}"} '{Tokens[Index].Value}', expected identifier or expression instead on index {Tokens[Index].Index}");
+                    ++Index;
+                }*/
+                bool Expression = ParseExpression(ref Index, ref OpenParentheses);
                 if (!Expression)
                 {
-                    if (!Sign)
+                    if (Sign)
                     {
-                        break;
-                    }
-                    else
+                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected identifier or expression instead on index {Tokens[Index].Index}");
+                        ++Index;
+                    }/* else if (Tokens[SignIndex].Value == ")")
                     {
-                        //AddError(Tokens[Index], "after operator");
-                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} after operator on index {Tokens[Index].Index}");
-                    }
-                }/* else if (Tokens[Index].Category == "bracket close")
+                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected operation instead on index {Tokens[Index].Index}");
+                        ++Index;
+                    }*/
+                    return false;
+                }
+
+                while (Index < Tokens.Count)
                 {
-                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} on index {Tokens[Index].Index}");
-                }*/
+                    Sign = false;
+                    SignIndex = Index;
+                    while (Tokens[Index].Category == "unknown")
+                    {
+                        AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
+                        ++Index;
+                    }
+                    if (Tokens[Index].Category.StartsWith("op low"))
+                    {
+                        Sign = true;
+                        ++Index;
+                    }
+                    /*else if (Tokens[Index].Category.StartsWith("op"))
+                    {
+                        AddError(Tokens[Index], $"Redundant {"{0}"} '{Tokens[Index].Value}', expected identifier or expression instead on index {Tokens[Index].Index}");
+                        ++Index;
+                    }*/
+                    Expression = ParseExpression(ref Index, ref OpenParentheses);
+                    if (!Expression)
+                    {
+                        if (Sign)
+                        {
+                            AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} after operator on index {Tokens[Index].Index}");
+                            ++Index;
+                        }/* else if (Tokens[SignIndex].Value == ")")
+                        {
+                            AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected operation instead on index {Tokens[Index].Index}");
+                            ++Index;
+                        }*/
+                        else
+                        {
+                            break;
+                        }
+                    }/* else if (Tokens[Index].Category == "bracket close")
+                    {
+                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} on index {Tokens[Index].Index}");
+                    }*/
+                }
             }
+            catch (ArgumentOutOfRangeException Exception)
+            {
+                if (Sign)
+                {
+                    AddError(Tokens[Tokens.Count - 1], $"Redundant or incomplete {"{0}"} on index {Tokens[Tokens.Count - 1].Index}");
+                }
+            }
+
             return true;
         }
 
-        private bool ParseExpression(ref int Index)
+        private bool ParseExpression(ref int Index, ref int OpenParentheses)
         {
-            bool Expression = ParseValueOrBr(ref Index);
+            while (Tokens[Index].Category == "unknown")
+            {
+                AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
+                ++Index;
+            }
+            bool Expression = ParseIds(ref Index, ref OpenParentheses);
             if (!Expression)
             {
                 return false;
             }
             while (Index < Tokens.Count)
             {
+                int OperatorIndex = Index;
                 bool Operator = false;
-                while (Tokens[Index].Category == "unknown")
-                {
-                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' unknown token, expected a number instead on index {Tokens[Index].Index}");
-                    Index++;
-                }
-                if ("*%/^".Contains(Tokens[Index].Value))
-                {
-                    Operator = true;
-                    ++Index;
-                } else 
-                Expression = ParseValueOrBr(ref Index);
-                if (!Expression)
-                {
-                    if (!Operator)
-                    {
-                        break;
-                    } else
-                    {
-                        //AddError(Tokens[Index], "after operator");
-                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} after operator on index {Tokens[Index].Index}");
-                    }
-                    //++Index;
-                    //Result = StartIndex != Index || Result;
-                }/* else if (Tokens[Index].Category == "bracket close")
-                {
-                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} on index {Tokens[Index].Index}");
-                }*/ 
-                //else if (Operator)
-                //{
-                //    //AddError(Tokens[Index], "after operator");
-                //    Result = false || Result;
-                //    break;
-                //} else
-                //{
-                //    break;
-                //}
-            }
-            /*while (TokenEnumerator.MoveNext())
-            {
-                Token Token = TokenEnumerator.Current;
-                bool Operator = "*%/".Contains(Token.Value);
-                if (Operator && !ParseExpression())
+                try
                 {
 
+                    while (Tokens[Index].Category == "unknown")
+                    {
+                        AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
+                        ++Index;
+                    }
+                    /*while (Tokens[Index].Category == "unknown")
+                    {
+                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' unknown token, expected a number instead on index {Tokens[Index].Index}");
+                        Index++;
+                    }*/
+                    if (Tokens[Index].Category.StartsWith("op high"))
+                    {
+                        Operator = true;
+                        ++Index;
+                    }
+                    else if (Tokens[Index].Value == ")" && OpenParentheses == 0)
+                    {
+                        AddError(Tokens[Index], $"Unexpected {Operations["\\)"]} on index {Index}");
+                        ++Index;
+                        continue;
+                    }
+                    /*else if (Tokens[Index].Category.StartsWith("op"))
+                    {
+                        AddError(Tokens[Index], $"Redundant {"{0}"} '{Tokens[Index].Value}', expected identifier or expression instead on index {Tokens[Index].Index}");
+                        ++Index;
+                    }*/
+                    Expression = ParseIds(ref Index, ref OpenParentheses);
+                    if (!Expression)
+                    {
+                        if (!Operator/* && Tokens[OperatorIndex].Value != ")"*/)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} after operator on index {Tokens[Index].Index}");
+                            ++Index;
+                        }
+                    }/*
+                else if (Tokens[Index].Value == ")")
+                {
+                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} on index {Tokens[Index].Index}");
+                    ++Index;
+                }*/
+                }  catch (ArgumentOutOfRangeException Exception)
+                {
+                    if (Operator)
+                    {
+                        AddError(Tokens[Tokens.Count - 1], $"Redundant or incomplete {"{0}"} on index {Tokens[Tokens.Count - 1].Index}");
+                    }
                 }
-            }*/
+            }
             return true;
         }
 
-        /*private bool ParsePower(ref int Index)
-        {
-            if (!ParseBrackets(ref Index))
-            {
-                return false;
-            }
-            while (Index < Tokens.Count)
-            {
-                //Token Token = TokenEnumerator.Current;
-                bool Operator = "*%/".Contains(Tokens[Index].Value);
-                ++Index;
-                if (Operator && !ParsePower(ref Index))
-                {
-                    AddError(Tokens[Index], "after operator");
-                    ++Index;
-                }
-                else if (Operator)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }*/
-
-        private bool ParseValueOrBr(ref int Index)
+        private bool ParseIds(ref int Index, ref int OpenParentheses)
         {
             bool Result = false;
-            try
+            while (Tokens[Index].Category == "unknown")
             {
-                if (Tokens[Index].Category == "bracket open")
+                AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
+                ++Index;
+            }
+            if (Tokens[Index].Category == "op parentheses")//(Tokens[Index].Category == "op bracket")
+            {
+                if (Tokens[Index].Value == "(")
                 {
-                    Index++;
-                    Result = ParseSyntax(ref Index);
-                    if (Tokens[Index].Category == "bracket close" && Result)
+                    ++OpenParentheses;
+                    int ParenthesesIndex = Index;
+                    try
                     {
-                        Result = true;
-                        Index++;
-                    }
-                    else
-                    {
-                        AddError(Tokens[Index], $"Expected {Operations["\\)"]} instead of {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                        Index++;
-                        //AddError(Tokens[Index], "instead of closing bracket");
-                        //Result = false;
-                        //THROW ERROR
-                    }
-                }
-                else if (Tokens[Index].Category == "name")
-                {
-                    Index++;
-                    if(Tokens[Index].Category == "bracket open")
-                    {
-                        int BracketIndex = Index;
-                        Index++;
-                        Result = ParseSyntax(ref Index);
-                        if (Result && Tokens[Index].Category == "op sep")
+                        ++Index;
+                        Result = ParseSyntax(ref Index, ref OpenParentheses);
+                        if (Tokens[Index].Value == ")") // Tokens[Index].Value == "op bracket"
                         {
-                            while (Result && Tokens[Index].Category == "op sep")
+                            --OpenParentheses;
+                            if (Result)
                             {
-                                Index++;
-                                Result = ParseSyntax(ref Index);
+                                ++Index;
                             }
-                            if (Tokens[Index].Category != "bracket close")
-                            {
-                                AddError(Tokens[Index], $"Expected {Operations["\\)"]} instead of {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                                Index++;
-                                //AddError(Tokens[Index], $", expected {Operations[")"]} instead");
-                                //Result = false;
-                                //THROW ERROR
-                            } else
-                            {
-                                Index++;
-                                Result = true;
-                            }
-                        } else if (Tokens[Index].Category != "bracket close")
+                        }
+                        /*else if (Tokens[Index].Value == ")")
+                        {
+                            AddError(Tokens[Index], $"Redundant {Operations["\\)"]} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
+                            ++Index;
+                        }
+                        else
                         {
                             AddError(Tokens[Index], $"Expected {Operations["\\)"]} instead of {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                            Index++;
-                            //AddError(Tokens[Index], $", expected {Operations[")"]} instead");
-                            //Result = false;
-                            //THROW ERROR
-                        } else
-                        {
-                            AddError(Tokens[Index], $"Redundant {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                            Index++;
-                            //AddError(Tokens[BracketIndex], "reduntant");
-                            //Result = false;
-                            //THROW ERROR
-                        }
-                    } else
+                            ++Index;
+                        }*/
+                    }
+                    catch (ArgumentOutOfRangeException Exception)
                     {
-                        Result = true;
+                        AddError(Tokens[Tokens.Count - 1], $"Expected {Operations["\\)"]} on closing of expression on index {Tokens[Tokens.Count - 1].Index + 1} to match opening parentheses on index {Tokens[ParenthesesIndex].Index}");
                     }
                 }
-                else if (Tokens[Index].Category == "num")
-                {
-                    Index++;
-                    Result = true;
-                } else if (Tokens[Index].Category == "unknown")
-                {
-                    AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
-                    Index++;
-                    Result = ParseValueOrBr(ref Index);
-                } /*else
-                {
-                    Index--;
-                    if (Tokens[Index].Category == "num" || Tokens[Index].Category == "name")
-                    {
-                        Result = true;
-                    }
-                }*/
             }
-            catch (ArgumentOutOfRangeException Exception)
+            else if (Tokens[Index].Category == "name")
             {
-                //AddError(Tokens[Index], $"Expected {Operations[")"]} instead of {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                AddError(Tokens[Tokens.Count - 1], $"Expected {Operations["\\)"]} on closing of expression on index {Tokens[Tokens.Count - 1].Index + 1}");
+                ++Index;
+                if(Index < Tokens.Count && Tokens[Index].Value == "(")
+                {
+                    ++OpenParentheses;
+                    int ParenthesesIndex = Index;
+                    try
+                    {
+                        ++Index;
+                        Result = ParseSyntax(ref Index, ref OpenParentheses);
+                        if (Result && Tokens[Index].Category == "op sep")
+                        {
+                            while (Result && Tokens[Index].Category == "op sep" && Index < Tokens.Count)
+                            {
+                                ++Index;
+                                Result = ParseSyntax(ref Index, ref OpenParentheses);
+                            }
+                            if (Tokens[Index].Value != ")")
+                            {
+                                AddError(Tokens[Index], $"Incomplete {"{0}"} token '{Tokens[Index].Value}' instead of {Operations["\\)"]} on index {Tokens[Index].Index}");
 
-                //AddError(Tokens[Index], $", expected {Operations[")"]} instead");
-                //return false;
+                                ++Index;
+                            }
+                            else
+                            {
+                                --OpenParentheses;
+                                ++Index;
+                                Result = true;
+                            }
+                        }
+                        else if (Tokens[Index].Value != ")")
+                        {
+                            AddError(Tokens[Index], $"Unexpected {"{0}"} token '{Tokens[Index].Value}' instead of {Operations["\\)"]} on index {Tokens[Index].Index}");
+                            ++Index;
+                        }
+                        else
+                        {
+                            AddError(Tokens[Index], $"Redundant {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
+                            ++Index;
+                        }
+                    }
+                    catch (ArgumentOutOfRangeException Exception)
+                    {
+                        AddError(Tokens[Tokens.Count - 1], $"Expected {Operations["\\)"]} on closing of expression on index {Tokens[Tokens.Count - 1].Index + 1} to match opening parentheses on index {Tokens[ParenthesesIndex].Index}");
+                    }
+                } else
+                {
+                    Result = true;
+                }
             }
-            //else
-            //{
-            //AddError(Tokens[Index], "expected value, id or");
-            //Result = false;
-            //THROW ERROR
-            //}
+            else
+            {
+                Result = ParseValue(ref Index);
+            }
+            /*else if (Tokens[Index].Category == "bracket close")
+            {
+                AddError(Tokens[Index], $"Incomplete expression ending at index {Tokens[Index].Index}.\nMisplaced closing bracket");
+                Index++;
+            }*//*else
+            {
+                Index--;
+                if (Tokens[Index].Category == "num" || Tokens[Index].Category == "name")
+                {
+                    Result = true;
+                }
+            }*/
             return Result;
         }
 
+        private bool ParseValue(ref int Index)
+        {
+            bool Result = false;
+            while (Tokens[Index].Category == "unknown")
+            {
+                AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
+                ++Index;
+            }
+            if (Tokens[Index].Category == "num")
+            {
+                ++Index;
+                Result = true;
+            }/* else
+            {
+                AddError(Tokens[Index], $"Unexpected {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
+                ++Index;
+                return false;
+            }*/
+            
+            return Result;
+        }
+           
         private void AddError(Token Token, string Reason = "{0}")
         {
             var Keys = Operations.Keys.ToArray();
@@ -306,17 +348,6 @@ namespace LexSyntax_Analyzer
             {
                 Found = "unknown";
             }
-
-            //{ "unknown", "Unknown token"}
-            /*if (Token.Category == "unknown")
-            {
-                Errors.Add(new FormatException($"Unexpected '{Token.Value}' {Token.Category} token at {Token.Index}"));
-            }*/
-            //var Results = from result in Operations
-            //where Regex.Match(Token.Value, result.Key, RegexOptions.Singleline).Success
-            //select result.Value;
-            //var Result = Operations[Token.Value];
-            //Errors.Add(new FormatException($"Unexpected '{Token.Value}' {Result/*Results.First()*/} {Reason} on index {Token.Index}"));
             Errors.Add(new FormatException(String.Format(Reason, Found)));
 
         }
