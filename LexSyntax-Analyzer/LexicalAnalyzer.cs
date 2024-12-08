@@ -14,7 +14,7 @@ namespace LexSyntax_Analyzer
         protected static readonly string RNum = @"^[\d]*\.?[\d]+([eE][-+][\d]+)?";
         protected static readonly string RName = @"^[A-Za-z]{1}[_A-Z0-9a-z]*";
         public List<Token> Tokens { get; private set; } = new();
-        public List<Exception> Errors { get; protected set; } = new();
+        public List<SyntaxException> Errors { get; protected set; } = new();
         public string Expression { get; protected set; }
 
 
@@ -41,15 +41,15 @@ namespace LexSyntax_Analyzer
                     {
                         int Begin = i + NumMatch.Length;
                         int End = Begin;
-                        while (!Separators.Contains(CharArray[End]))
+                        while (!Separators.Contains(CharArray[End]) && End < CharArray.Length)
                         {
                             End++;
                         }
                         if (Begin == End - 1)
                         {
-                            Errors.Add(new FormatException($"Character #{i + NumMatch.Length} ('{CharArray[i + NumMatch.Length]}') is not a valid separator"));
+                            Errors.Add(new SyntaxException($"Character #{i + NumMatch.Length} ('{CharArray[i + NumMatch.Length]}') is not a valid separator", i, NumMatch.Length));
                         } else {
-                            Errors.Add(new FormatException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]"));
+                            Errors.Add(new SyntaxException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]", i, End - i));
                             Tokens.Add(new Token(Expression[i..End], "unknown", i));
                         }
                         i = End - 1;
@@ -65,11 +65,11 @@ namespace LexSyntax_Analyzer
                     {
                         int Begin = i + NameMatch.Length;
                         int End = Begin;
-                        while (!Separators.Contains(CharArray[End]))
+                        while (!Separators.Contains(CharArray[End]) && End < CharArray.Length)
                         {
                             End++;
                         }
-                        Errors.Add(new FormatException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]"));
+                        Errors.Add(new SyntaxException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]", i, End - i));
                         Tokens.Add(new Token(Expression[i..End], "unknown", i));
                         i = End - 1;
                     } else {

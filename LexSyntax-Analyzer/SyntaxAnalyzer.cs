@@ -11,7 +11,6 @@ namespace LexSyntax_Analyzer
 {
     public class SyntaxAnalyzer: LexicalAnalyzer
     {
-        //private IEnumerator<Token> TokenEnumerator;
         private Dictionary<string, string> Operations = new Dictionary<string, string>()
         {
             {RNum, "number"},
@@ -46,17 +45,12 @@ namespace LexSyntax_Analyzer
                 AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' unknown token, expected a number instead on index {Tokens[Index].Index}");
                 Index++;
             }
-            //if ("+-".Contains(Tokens[Index].Value))
             try {
                 if (Tokens[Index].Category.StartsWith("op low"))
                 {
                     Sign = true;
                     ++Index;
-                }/* else if (Tokens[Index].Category.StartsWith("op"))
-                {
-                    AddError(Tokens[Index], $"Redundant {"{0}"} '{Tokens[Index].Value}', expected identifier or expression instead on index {Tokens[Index].Index}");
-                    ++Index;
-                }*/
+                }
                 bool Expression = ParseExpression(ref Index, ref OpenParentheses);
                 if (!Expression)
                 {
@@ -64,11 +58,7 @@ namespace LexSyntax_Analyzer
                     {
                         AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected identifier or expression instead on index {Tokens[Index].Index}");
                         ++Index;
-                    }/* else if (Tokens[SignIndex].Value == ")")
-                    {
-                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected operation instead on index {Tokens[Index].Index}");
-                        ++Index;
-                    }*/
+                    }
                     return false;
                 }
 
@@ -86,11 +76,6 @@ namespace LexSyntax_Analyzer
                         Sign = true;
                         ++Index;
                     }
-                    /*else if (Tokens[Index].Category.StartsWith("op"))
-                    {
-                        AddError(Tokens[Index], $"Redundant {"{0}"} '{Tokens[Index].Value}', expected identifier or expression instead on index {Tokens[Index].Index}");
-                        ++Index;
-                    }*/
                     Expression = ParseExpression(ref Index, ref OpenParentheses);
                     if (!Expression)
                     {
@@ -98,19 +83,12 @@ namespace LexSyntax_Analyzer
                         {
                             AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} after operator on index {Tokens[Index].Index}");
                             ++Index;
-                        }/* else if (Tokens[SignIndex].Value == ")")
-                        {
-                            AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"}, expected operation instead on index {Tokens[Index].Index}");
-                            ++Index;
-                        }*/
+                        }
                         else
                         {
                             break;
                         }
-                    }/* else if (Tokens[Index].Category == "bracket close")
-                    {
-                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} on index {Tokens[Index].Index}");
-                    }*/
+                    }
                 }
             }
             catch (ArgumentOutOfRangeException Exception)
@@ -148,11 +126,7 @@ namespace LexSyntax_Analyzer
                         AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
                         ++Index;
                     }
-                    /*while (Tokens[Index].Category == "unknown")
-                    {
-                        AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' unknown token, expected a number instead on index {Tokens[Index].Index}");
-                        Index++;
-                    }*/
+                    
                     if (Tokens[Index].Category.StartsWith("op high"))
                     {
                         Operator = true;
@@ -164,15 +138,11 @@ namespace LexSyntax_Analyzer
                         ++Index;
                         continue;
                     }
-                    /*else if (Tokens[Index].Category.StartsWith("op"))
-                    {
-                        AddError(Tokens[Index], $"Redundant {"{0}"} '{Tokens[Index].Value}', expected identifier or expression instead on index {Tokens[Index].Index}");
-                        ++Index;
-                    }*/
+                    
                     Expression = ParseIds(ref Index, ref OpenParentheses);
                     if (!Expression)
                     {
-                        if (!Operator/* && Tokens[OperatorIndex].Value != ")"*/)
+                        if (!Operator)
                         {
                             break;
                         }
@@ -181,12 +151,7 @@ namespace LexSyntax_Analyzer
                             AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} after operator on index {Tokens[Index].Index}");
                             ++Index;
                         }
-                    }/*
-                else if (Tokens[Index].Value == ")")
-                {
-                    AddError(Tokens[Index], $"Unexpected '{Tokens[Index].Value}' {"{0}"} on index {Tokens[Index].Index}");
-                    ++Index;
-                }*/
+                    }
                 }  catch (ArgumentOutOfRangeException Exception)
                 {
                     if (Operator)
@@ -206,7 +171,7 @@ namespace LexSyntax_Analyzer
                 AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
                 ++Index;
             }
-            if (Tokens[Index].Category == "op parentheses")//(Tokens[Index].Category == "op bracket")
+            if (Tokens[Index].Category == "op parentheses")
             {
                 if (Tokens[Index].Value == "(")
                 {
@@ -216,7 +181,7 @@ namespace LexSyntax_Analyzer
                     {
                         ++Index;
                         Result = ParseSyntax(ref Index, ref OpenParentheses);
-                        if (Tokens[Index].Value == ")") // Tokens[Index].Value == "op bracket"
+                        if (Tokens[Index].Value == ")")
                         {
                             --OpenParentheses;
                             if (Result)
@@ -224,16 +189,6 @@ namespace LexSyntax_Analyzer
                                 ++Index;
                             }
                         }
-                        /*else if (Tokens[Index].Value == ")")
-                        {
-                            AddError(Tokens[Index], $"Redundant {Operations["\\)"]} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                            ++Index;
-                        }
-                        else
-                        {
-                            AddError(Tokens[Index], $"Expected {Operations["\\)"]} instead of {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index}");
-                            ++Index;
-                        }*/
                     }
                     catch (ArgumentOutOfRangeException Exception)
                     {
@@ -296,40 +251,27 @@ namespace LexSyntax_Analyzer
             {
                 Result = ParseValue(ref Index);
             }
-            /*else if (Tokens[Index].Category == "bracket close")
-            {
-                AddError(Tokens[Index], $"Incomplete expression ending at index {Tokens[Index].Index}.\nMisplaced closing bracket");
-                Index++;
-            }*//*else
-            {
-                Index--;
-                if (Tokens[Index].Category == "num" || Tokens[Index].Category == "name")
-                {
-                    Result = true;
-                }
-            }*/
             return Result;
         }
 
         private bool ParseValue(ref int Index)
         {
             bool Result = false;
+            bool Unknown = false;
             while (Tokens[Index].Category == "unknown")
             {
                 AddError(Tokens[Index], $"Unexpected unknown token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
                 ++Index;
+                Unknown = true;
             }
             if (Tokens[Index].Category == "num")
             {
                 ++Index;
                 Result = true;
-            }/* else
+            } else if (Unknown)
             {
-                AddError(Tokens[Index], $"Unexpected {"{0}"} token '{Tokens[Index].Value}' on index {Tokens[Index].Index} found");
-                ++Index;
-                return false;
-            }*/
-            
+                Result = true;
+            }
             return Result;
         }
            
@@ -348,8 +290,7 @@ namespace LexSyntax_Analyzer
             {
                 Found = "unknown";
             }
-            Errors.Add(new FormatException(String.Format(Reason, Found)));
-
+            Errors.Add(new SyntaxException(string.Format(Reason, Found), Token.Index, Token.Value.Length));
         }
     }
 }

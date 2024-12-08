@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LexSyntax_Analyzer
 {
-    public class Analyzer
+    public partial class Analyzer
     {
         private static readonly Dictionary<char, uint> TokensPriorities = new()
 
