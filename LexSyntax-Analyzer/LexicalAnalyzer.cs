@@ -41,7 +41,7 @@ namespace LexSyntax_Analyzer
                     {
                         int Begin = i + NumMatch.Length;
                         int End = Begin;
-                        while (!Separators.Contains(CharArray[End]) && End < CharArray.Length)
+                        while (End < CharArray.Length && !Separators.Contains(CharArray[End]))
                         {
                             End++;
                         }
@@ -65,7 +65,7 @@ namespace LexSyntax_Analyzer
                     {
                         int Begin = i + NameMatch.Length;
                         int End = Begin;
-                        while (!Separators.Contains(CharArray[End]) && End < CharArray.Length)
+                        while (End < CharArray.Length && !Separators.Contains(CharArray[End]))
                         {
                             End++;
                         }

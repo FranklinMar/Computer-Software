@@ -4,7 +4,7 @@ namespace LexSyntax_Analyzer
     {   
         private Color BackgroundColour;
         private Font Font;
-        public SyntaxAnalyzer ExpressionAnalyzer { get; private set; }    
+        public StateAnalyzer ExpressionAnalyzer { get; private set; }    
 
         public Analyzer()
         {
@@ -46,7 +46,11 @@ namespace LexSyntax_Analyzer
                 ResultBox.Text = "";
                 var Errors = ExpressionAnalyzer.Errors;
                 //int Index = 0;
-                ResultBox.Text = string.Join("\n", Errors.Select(Err => Err.Message));
+                for (int i = 0; i < Errors.Count; i++)
+                {
+                    ResultBox.Text += $"#{i + 1}: {ExpressionAnalyzer.Errors[i].Message}\n";
+                }
+                // ResultBox.Text = string.Join("\n#1:\t", Errors.Select(Err => Err.Message));
                 Box.Select(0, Box.Text.Length);
                 Box.ForeColor = Color.White;
                 Box.SelectionColor = Color.White;
