@@ -89,7 +89,7 @@ namespace LexSyntax_Analyzer
                     }*/
                     if ("()".Contains(CharArray[i]))
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op parentheses", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), "parentheses", i));
                     }
                     else if ('^' == CharArray[i])
                     {
