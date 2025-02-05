@@ -3,35 +3,36 @@ using LexSyntax_Analyzer;
 
 namespace ParallelTree_Builder;
 
-public class TreeNode
-{
-    private Token _Token { get; init; }
+public class TreeNode {
+    
+    public string Value { get; private set; }
+    private string _Category { get; set; }
+
+    public string Category
+    {
+        get => _Category;
+        set
+        {
+            if (value == "unknown")
+            {
+                throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Category));
+            }
+
+            _Category = value;
+        }
+    }
+    public bool IsOp => Category.StartsWith("op");
+    // public bool IsObject => Category is "num" or "name";
 
     private TreeNode? _Left { get; set; }
     private TreeNode? _Right { get; set; }
-    public Token Token
-    {
-        get => _Token;
-        private init
-        {
-            if (value.Category == "unknown")
-            {
-                throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Value));
-            }
-            _Token = value;
-        }
-    }
-    public string Value => Token.Value;
-    public string Category => Token.Category;
-    
-    public int Index => Token.Index;
 
     public TreeNode? Left
     {
         get => _Left;
         set
         {
-            if (_Token.Category is "name" or "num" && value != null)
+            if (Category is "name" or "num" && value != null)
             {
                 throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
             }
@@ -77,7 +78,7 @@ public class TreeNode
         get => _Right;
         set
         {
-            if (_Token.Category is "name" or "num" && value != null)
+            if (Category is "name" or "num" && value != null)
             {
                 throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
             }
@@ -118,9 +119,10 @@ public class TreeNode
     }
 
 
-    public TreeNode(Token Token)
+    public TreeNode(string Value, string Category)
     {
-        this.Token = Token;
+        this.Value = Value;
+        this.Category = Category;
         _Left = _Right = null;
     }
 
@@ -131,10 +133,11 @@ public class TreeNode
         this.Right = Right;
     }*/
 
-    public TreeNode(Token Token, TreeNode? Left, TreeNode? Right)
+    public TreeNode(string Value, string Category, TreeNode? Left, TreeNode? Right)
     {
-        this.Token = Token;
-        if (Token.Category is "name" or "num")
+        this.Value = Value;
+        this.Category = Category;
+        if (Category is "name" or "num")
         {
             if (Left != null)
             {
@@ -147,7 +150,7 @@ public class TreeNode
         }
         _Left = Left;
         _Right = Right;
-        if (this.Token.IsOp)
+        if (IsOp)
         {
             if (Left == null)
             {

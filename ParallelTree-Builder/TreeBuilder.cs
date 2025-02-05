@@ -37,13 +37,13 @@ public class TreeBuilder
         {
             if (!Token.IsOp)
             {
-                TreeNode = new TreeNode(Token);
+                TreeNode = new TreeNode(Token.Value, Token.Category);
             }
             else
             {
                 var Right = TreeStack.Pop();
                 var Left = TreeStack.Pop();
-                TreeNode = new TreeNode(Token, Left, Right);
+                TreeNode = new TreeNode(Token.Value, Token.Category, Left, Right);
             }
             TreeStack.Push(TreeNode);
         }
@@ -149,9 +149,8 @@ public class TreeBuilder
                         _ => throw new DataException($"Couldn't parse expression: {Leaf.Value}")
                     };
 
-                    Index = (int)(Leaf.Left?.Index < Leaf.Right?.Index ? Leaf.Left?.Index : Leaf.Right?.Index)!;
-                    NewNode = new (new ($"{Temp}", "num", Index));
-                    
+                    NewNode = new($"{Temp}", "num");
+
                 }
                 else if (Leaf.Left?.Category is "name" && Leaf.Right?.Category is "num" ||
                          Leaf.Left?.Category is "num" && Leaf.Right?.Category is "name")
@@ -201,8 +200,41 @@ public class TreeBuilder
         return Tree;
     }
 
-    public TreeNode DivideAndConquer(TreeNode Tree)
+    public TreeMultinode DivideAndConquer(TreeNode Tree)
     {
+        // TreeNode NewNode = new TreeNode();\
+        if (Tree.Left == null || Tree.Right == null)
+        {
+            return new TreeMultinode(Tree.Value, Tree.Category);
+        }
+        TreeMultinode Root = new(Tree.Value, Tree.Category);
+        TreeMultinode Current = new(Tree.Value, Tree.Category);
+        Queue<TreeNode> NodeQueue = new();
+        TreeNode Node;
+        NodeQueue.Enqueue(Tree);
+        do
+        {
+            Node = NodeQueue.Dequeue();
+            if (Node.Value == Current.Value && Current.IsOp)
+            {
+                Current.Children.Add(Node.Left);
+                NodeQueue.Enqueue(Node.Left);
+                Current.Children.Add(Node.Right);
+                NodeQueue.Enqueue(Node.Right);
+            }
+            else if ()
+            {
+                
+            }
+        } while (true);
+        /*Node.Traverse((Node) =>
+        {
+            if (TreeNode.Left?.Category is "num" or "name")
+            {
+                Root.Children.Add();
+            }
+        });*/
+        
         return null;
     }
 }

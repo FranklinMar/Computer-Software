@@ -10,7 +10,7 @@ namespace LexSyntax_Analyzer
     {
         public string Value { get; private set; } = Value;
 
-        public string Category { get; private set; } = Category;
+        public string Category { get; } = Category;
 
         private int _Index { get; set; } = Index;
 

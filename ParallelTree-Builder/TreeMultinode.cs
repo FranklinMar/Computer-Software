@@ -2,30 +2,56 @@ using LexSyntax_Analyzer;
 
 namespace ParallelTree_Builder;
 
-public class TreeMultinode
-{
-    private Token _Token { get; set; }
-    public Token Token
+public class TreeMultinode {
+    // private string _Value { get; set ; }
+    public string Value { get; private set ; }
+    private string _Category { get; set; }
+    /*public string Value
     {
-        get => _Token;
-        private set
+        get => _Value;
+        set
         {
-            if (value.Category == "unknown")
+            if ("%^".Contains(value))
             {
-                throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Value));
+                throw new ArgumentException($"High priority operation {value} is not supported.");
             }
-            _Token = value;
+        }
+    }*/
+
+    public string Category
+    {
+        get => _Category;
+        set
+        {
+            if (value == "unknown")
+            {
+                throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Category));
+            }
+
+            _Category = value;
         }
     }
-    public string Value => Token.Value;
-    public string Category => Token.Category;
+    public bool IsOp => Category.StartsWith("op");
+    public List<TreeNode> Children { get; } = new();
 
-    public List<TreeNode> Children { get; private set; } = new();
-
-    public TreeMultinode(Token Token, List<TreeNode> Children)
+    public TreeMultinode(string Value, string Category)
     {
-        this.Token = Token;
+        this.Value = Value;
+        this.Category = Category;
+    }
+
+    public TreeMultinode(string Value, string Category, List<TreeNode> Children)
+    {
+        this.Value = Value;
+        this.Category = Category;
         this.Children = Children;
+    }
+
+    public TreeMultinode(string Value, string Category, params TreeNode[] Nodes)
+    {
+        this.Value = Value;
+        this.Category = Category;
+        Children.AddRange(Nodes);
     }
 }
     
