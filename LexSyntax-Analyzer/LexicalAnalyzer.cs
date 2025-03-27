@@ -50,12 +50,12 @@ namespace LexSyntax_Analyzer
                             Errors.Add(new SyntaxException($"Character #{i + NumMatch.Length} ('{CharArray[i + NumMatch.Length]}') is not a valid separator", i, NumMatch.Length));
                         } else {
                             Errors.Add(new SyntaxException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]", i, End - i));
-                            Tokens.Add(new Token(Expression[i..End], "unknown", i));
+                            Tokens.Add(new Token(Expression[i..End], Category.Unknown/*"unknown"*/, i));
                         }
                         i = End - 1;
 
                     } else {
-                        Tokens.Add(new Token(NumMatch.Value, "num", i));
+                        Tokens.Add(new Token(NumMatch.Value, Category.Number/*"num"*/, i));
                         i = i + NumMatch.Length - 1;
                     }
                 }
@@ -70,42 +70,39 @@ namespace LexSyntax_Analyzer
                             End++;
                         }
                         Errors.Add(new SyntaxException($"Invalid token ('{Expression[i..End]}') on indexes [{i} - {End - 1}]", i, End - i));
-                        Tokens.Add(new Token(Expression[i..End], "unknown", i));
+                        Tokens.Add(new Token(Expression[i..End], Category.Unknown/*"unknown"*/, i));
                         i = End - 1;
                     } else {
-                        Tokens.Add(new Token(NameMatch.Value, "name", i));
+                        Tokens.Add(new Token(NameMatch.Value, Category.Name/*"name"*/, i));
                     }
                     i = i + NameMatch.Length - 1;
                 } 
                 else if (i < CharArray.Length)
                 {
-                    /*if ('(' == CharArray[i])
-                    {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op parentheses open", i));
-                    }
-                    else if (')' == CharArray[i])
-                    {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op parentheses close", i));
-                    }*/
                     if ("()".Contains(CharArray[i]))
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "parentheses", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), Category.Parenthesis/*"parenthesіs"*/, i));
                     }
+                    else if ("+-^*%/".Contains(CharArray[i]))
+                    {
+                        Tokens.Add(new Token(CharArray[i].ToString(), Category.Op, i));
+                    }
+                    /*
                     else if ('^' == CharArray[i])
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op high power", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), Category.Op*//*"op high power"*//*, i));
                     }
                     else if ("*%/".Contains(CharArray[i]))
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op high mult", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), Category.Op, i));
                     }
                     else if ("+-".Contains(CharArray[i]))
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op low add", i));
-                    }
+                        Tokens.Add(new Token(CharArray[i].ToString(), Category.Op*//*"op low add"*//*, i));
+                    }*/
                     else if (',' == CharArray[i])
                     {
-                        Tokens.Add(new Token(CharArray[i].ToString(), "op sep", i));
+                        Tokens.Add(new Token(CharArray[i].ToString(), Category.Separator/*"op sep"*/, i));
                     }
                 }
             }

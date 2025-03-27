@@ -3,7 +3,7 @@ namespace LexSyntax_Analyzer
     public partial class Analyzer : Form
     {   
         private Color BackgroundColour;
-        private Font Font;
+        private Font FontDefault;
         public StateAnalyzer ExpressionAnalyzer { get; private set; }    
 
         public Analyzer()
@@ -13,28 +13,20 @@ namespace LexSyntax_Analyzer
 
         private void AnalyzerForm_Load(object sender, EventArgs e)
         {
-            //LexicalAnalyzer Lex = new("12345 123124dasdf 1");
-            //Console.WriteLine(Lex);
-            // "12345 123124dasdf (1 + hello(123, 3123 ,gfg))"
-            //SyntaxAnalyzer Lex = new("(1 + hello(123, 3123 ,gfg))");
-            //SyntaxAnalyzer Lex = new("12345 123124dasdf * 123 + (1 + hello(123, 3123 ,gfg)) / (45");
-            //SyntaxAnalyzer Lex = new("a-+(t*5.81.8 - ))/");
-            //SyntaxAnalyzer Lex = new("a-(t*5.818 - x1)/x2");
-            //Lex.Errors.Add(new Exception());
-            //Console.WriteLine(Lex);
             BackgroundColour = InputBox.BackColor;
-            Font = InputBox.Font;
+            FontDefault = InputBox.Font;
         }
 
         private void NewInput(object sender, EventArgs e)
         {
             RichTextBox Box = (RichTextBox) sender;
+            Box.Font = FontDefault;
             ExpressionAnalyzer = new(Box.Text);
             if (ExpressionAnalyzer.Errors.Count == 0)
             {
                 ResultBox.Text = "No errors found";
-                ResultBox.Select(0, Box.Text.Length - 1);
-                ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
+                //ResultBox.Select(0, Box.Text.Length - 1);
+                //ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
                 //ResultBox.ForeColor = Color.LightGreen;
                 Box.Select(0, Box.Text.Length);
                 Box.ForeColor = Color.LightGreen;
@@ -45,12 +37,11 @@ namespace LexSyntax_Analyzer
             {
                 ResultBox.Text = "";
                 var Errors = ExpressionAnalyzer.Errors;
-                //int Index = 0;
                 for (int i = 0; i < Errors.Count; i++)
                 {
                     ResultBox.Text += $"#{i + 1}: {ExpressionAnalyzer.Errors[i].Message}\n";
                 }
-                // ResultBox.Text = string.Join("\n#1:\t", Errors.Select(Err => Err.Message));
+                Box.Font = Font;
                 Box.Select(0, Box.Text.Length);
                 Box.ForeColor = Color.White;
                 Box.SelectionColor = Color.White;

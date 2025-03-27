@@ -30,9 +30,10 @@ namespace LexSyntax_Analyzer
             {@"\/", "division operator"},
             {@"\%", "mod division operator"},
             {@"\^", "power operator"},
-            {@"\(", "opening parentheses"},
-            {@"\)", "closing parentheses"}
+            {@"\(", "opening parenthesis"},
+            {@"\)", "closing parenthesis"}
         };
+
         public StateAnalyzer(string Expression): base(Expression)
         {
             CurrentState = State.Begin;
@@ -43,7 +44,7 @@ namespace LexSyntax_Analyzer
                 if (Tokens[Index].IsOp) {
                     if (CurrentState == State.Begin) {
                         if (Tokens[Index].Value == "-") { // Tokens[Index].Category.StartsWith("op low")
-                            Token Phantom = new Token("0", "num", Tokens[Index].Index);
+                            Token Phantom = new Token("0", Category.Number, Tokens[Index].Index);
                             Tokens.Insert(Index, Phantom);
                             ++Index;
                             CurrentState = State.Num;
@@ -72,7 +73,7 @@ namespace LexSyntax_Analyzer
                         // AddError(Tokens[Index]); // 7
                     }
                     if (CurrentState == State.Begin) {
-                        Errors.Add(new SyntaxException($"Unexpected {GetName(Tokens[Index])} on index {Tokens[Index].Index} can`t be placed before open parentheses or expression's opening", Tokens[Index].Index, Tokens[Index].Value.Length));
+                        Errors.Add(new SyntaxException($"Unexpected {GetName(Tokens[Index])} on index {Tokens[Index].Index} can`t be placed before open parenthesis or expression's opening", Tokens[Index].Index, Tokens[Index].Value.Length));
                         // AddError(Tokens[Index]); // 8
                     }
                     if (OpenParentheses == 0) {
@@ -82,7 +83,7 @@ namespace LexSyntax_Analyzer
                         OpenParentheses--;
                     }
                     CurrentState = State.Object;
-                } else if (Tokens[Index].Category.StartsWith("op sep")) {
+                } else if (Tokens[Index].Category == Category.Separator) {
                     if (CurrentState != State.Begin) {
                         if (OpenParentheses == 0) {
                             Errors.Add(new SyntaxException($"Unexpected {GetName(Tokens[Index])} on index {Tokens[Tokens.Count - 1].Index + Tokens[Tokens.Count - 1].Value.Length - 1}.\nAllowed only inside function arguments definition", Tokens[Tokens.Count - 1].Index + Tokens[Tokens.Count - 1].Value.Length, 0));
@@ -92,13 +93,13 @@ namespace LexSyntax_Analyzer
                             // AddError(Tokens[Index]); // ?? #2
                         }
                     }
-                } else if (Tokens[Index].Category == "name") {
+                } else if (Tokens[Index].Category == Category.Name) {
                     if (CurrentState != State.Op && CurrentState != State.Begin) {
                         Errors.Add(new SyntaxException($"{GetName(Tokens[Index])} on index {Tokens[Index].Index} can`t be placed immediatelly after number, function or another identifier", Tokens[Index].Index, Tokens[Index].Value.Length));
                         // AddError(Tokens[Index]); // 11
                     }
                     CurrentState = State.Name;
-                } else if (Tokens[Index].Category == "num") {
+                } else if (Tokens[Index].Category == Category.Number) {
                     if (CurrentState == State.Object) {
                         Errors.Add(new SyntaxException($"Unexpected {GetName(Tokens[Index])} on index {Tokens[Index].Index}.\n" +
                             "Expression should have only allowed operations, identifiers, numbers and parentheses ['(', ')']", Tokens[Index].Index, Tokens[Index].Value.Length));
@@ -114,10 +115,10 @@ namespace LexSyntax_Analyzer
             }
             if (OpenParentheses != 0 && Tokens.Count != 0) {
                 if (OpenParentheses < 0) {
-                    Errors.Add(new SyntaxException($"Expected a closing parentheses ')' for every opening parentheses '('", Tokens[Tokens.Count - 1].Index + Tokens[Tokens.Count - 1].Value.Length - 1, Tokens[Tokens.Count - 1].Value.Length));
+                    Errors.Add(new SyntaxException($"Expected a closing parenthesis ')' for every opening parenthesis '('", Tokens[Tokens.Count - 1].Index + Tokens[Tokens.Count - 1].Value.Length - 1, Tokens[Tokens.Count - 1].Value.Length));
                     // AddError(Tokens[Index]); // 9
                 } else {
-                    Errors.Add(new SyntaxException($"Expected an opening parentheses '(' for every closing parentheses ')'", Tokens[Tokens.Count - 1].Index + Tokens[Tokens.Count - 1].Value.Length - 1, Tokens[Tokens.Count - 1].Value.Length));
+                    Errors.Add(new SyntaxException($"Expected an opening parenthesis '(' for every closing parenthesis ')'", Tokens[Tokens.Count - 1].Index + Tokens[Tokens.Count - 1].Value.Length - 1, Tokens[Tokens.Count - 1].Value.Length));
                     // AddError(Tokens[Index]); // 10
                 }
             }

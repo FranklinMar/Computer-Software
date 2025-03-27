@@ -3,44 +3,43 @@ using LexSyntax_Analyzer;
 
 namespace ParallelTree_Builder;
 
-public class TreeNode {
+public class TreeNode: Tree {
     
-    public string Value { get; private set; }
-    private string _Category { get; set; }
+    //public new string Value { get; protected set; }
+    /*private Category _Category { get; set; }
 
-    public string Category
+    public Category Category
     {
         get => _Category;
         set
         {
-            if (value == "unknown")
+            if (value == Category.Unknown)
             {
                 throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Category));
             }
 
             _Category = value;
         }
-    }
-    public bool IsOp => Category.StartsWith("op");
+    }*/
     // public bool IsObject => Category is "num" or "name";
 
-    private TreeNode? _Left { get; set; }
-    private TreeNode? _Right { get; set; }
+    private Tree _Left { get; set; }
+    private Tree _Right { get; set; }
 
-    public TreeNode? Left
+    public Tree Left
     {
         get => _Left;
         set
         {
-            if (Category is "name" or "num" && value != null)
+            if (Category.HasFlag(Category.Object) && value != null)
             {
                 throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
             }
 
-            if (value != null && _Right == null)
-            {
-                throw new ArgumentException("Lone value in binary operator", nameof(Left));
-            }
+            //if (value != null && _Right == null)
+            //{
+            //    throw new ArgumentException("Lone value in binary operator", nameof(Left));
+            //}
             /*if (_Token.Category is not "name" or "num" && value !=null)
             {
                 Queue<TreeNode> Queue = new();
@@ -73,20 +72,20 @@ public class TreeNode {
         }
     }
 
-    public TreeNode? Right
+    public Tree Right
     {
         get => _Right;
         set
         {
-            if (Category is "name" or "num" && value != null)
+            if (Category.HasFlag(Category.Object) && value != null)
             {
                 throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
             }
 
-            if (value != null && _Left == null)
-            {
-                throw new ArgumentException("Lone value in binary operator", nameof(Right));
-            }
+            //if (value != null && _Left == null)
+            //{
+            //    throw new ArgumentException("Lone value in binary operator", nameof(Right));
+            //}
             /*if (_Token.Category is not "name" or "num" && value !=null)
             {
                 Queue<TreeNode> Queue = new();
@@ -119,12 +118,11 @@ public class TreeNode {
     }
 
 
-    public TreeNode(string Value, string Category)
+    /*public TreeNode(string Value, Category Category)
     {
         this.Value = Value;
         this.Category = Category;
-        _Left = _Right = null;
-    }
+    }*/
 
     /*public TreeNode(Token Token, TreeNode? Right)
     {
@@ -133,34 +131,34 @@ public class TreeNode {
         this.Right = Right;
     }*/
 
-    public TreeNode(string Value, string Category, TreeNode? Left, TreeNode? Right)
+    public TreeNode(string Value, Category Category, Tree Left, Tree Right)
     {
         this.Value = Value;
         this.Category = Category;
-        if (Category is "name" or "num")
-        {
-            if (Left != null)
-            {
-                throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
-            }
-            if (Right != null)
-            {
-                throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
-            }
-        }
+        //if (Category.HasFlag(Category.Object))
+        //{
+        //    if (Left != null)
+        //    {
+        //        throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
+        //    }
+        //    if (Right != null)
+        //    {
+        //        throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
+        //    }
+        //}
         _Left = Left;
         _Right = Right;
-        if (IsOp)
-        {
-            if (Left == null)
-            {
-                throw new ArgumentException("Lone value in binary operator", nameof(Right));
-            }
-            if (Right == null)
-            {
-                throw new ArgumentException("Lone value in binary operator", nameof(Right));
-            }
-        }
+        //if (IsOp)
+        //{
+        //    if (Left == null)
+        //    {
+        //        throw new ArgumentException("Lone value in binary operator", nameof(Left));
+        //    }
+        //    if (Right == null)
+        //    {
+        //        throw new ArgumentException("Lone value in binary operator", nameof(Right));
+        //    }
+        //}
     }
 
     /*private string PrintTree(StringBuilder Builder, string Prefix)
@@ -175,12 +173,11 @@ public class TreeNode {
 
     public override string ToString()
     {
-        StringBuilder Builder = new();
-        Print(Builder);
-        return Builder.ToString();
+        return Value;
     }
+    
 
-    public void Print(StringBuilder Builder, string Indent = "", bool Last = true)
+    override public void Print(StringBuilder Builder, string Indent = "", bool Last = true)
     {
         Builder.Append(Indent);
         if (Last)
@@ -193,18 +190,18 @@ public class TreeNode {
             Builder.Append("├─");
             Indent += "| ";
         }
-        Builder.Append($" \'{Value}\'\n");
+        Builder.Append($"\'{Value}\'\n");
 
-        var Children = new List<TreeNode>();
-        if (Left != null)
-        {
-            Children.Add(Left); 
-        }
+        var Children = new List<Tree>();
+        //if (Left != null)
+        //{
+        Children.Add(Left); 
+        //}
 
-        if (Right != null)
-        {
-            Children.Add(Right);
-        }
+        //if (Right != null)
+        //{
+        Children.Add(Right);
+        //}
 
         for (int i = 0; i < Children.Count; i++)
         {
@@ -212,17 +209,17 @@ public class TreeNode {
         }
     }
 
-    public void Traverse(Action<TreeNode> Func)
+    public void Traverse(Action<Tree> Func)
     {
         Func(this);
-        if (Left != null)
+        if (/*Left != null*/ Left is TreeNode)
         {
-            Left.Traverse(Func);
+            ((TreeNode) Left).Traverse(Func);
         }
 
-        if (Right != null)
+        if (/*Right != null*/Right is TreeNode)
         {
-            Right.Traverse(Func);
+            ((TreeNode) Right).Traverse(Func);
         }
     }
 }

@@ -6,7 +6,8 @@ namespace ParallelTree_Builder
     public partial class Builder : Form
     {
         private Color BackgroundColour;
-        private Font Font;
+        private Color ForeColour;
+        private Font FontDefault;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public StateAnalyzer ExpressionAnalyzer { get; private set; }
 
@@ -18,17 +19,20 @@ namespace ParallelTree_Builder
         private void LoadBuilder(object sender, EventArgs e)
         {
             BackgroundColour = InputBox.BackColor;
-            Font = InputBox.Font;
+            ForeColour = InputBox.ForeColor;
+            FontDefault = InputBox.Font;
         }
 
         private void NewInput(object sender, EventArgs e)
         {
             RichTextBox Box = (RichTextBox)sender;
+            Box.ForeColor = ForeColour;
+            Box.Font = FontDefault;
             ExpressionAnalyzer = new(Box.Text);
             if (ExpressionAnalyzer.Errors.Count == 0)
             {
                 TreeBuilder ParallelTree = new(ExpressionAnalyzer);
-                ResultBox.Text = ParallelTree.Root?.ToString();
+                ResultBox.Text = ParallelTree.Root.Print();
                 ResultBox.Select(0, Box.Text.Length - 1);
                 ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
                 //ResultBox.ForeColor = Color.LightGreen;

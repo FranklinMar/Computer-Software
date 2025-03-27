@@ -28,69 +28,75 @@
         /// </summary>
         private void InitializeComponent()
         {
-            InputBox = new System.Windows.Forms.RichTextBox();
-            ResultBox = new System.Windows.Forms.RichTextBox();
-            AnalyzerLabel = new System.Windows.Forms.Label();
-            ResultLabel = new System.Windows.Forms.Label();
+            InputBox = new RichTextBox();
+            ResultBox = new RichTextBox();
+            AnalyzerLabel = new Label();
+            ResultLabel = new Label();
             SuspendLayout();
             // 
             // InputBox
             // 
-            InputBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right));
-            InputBox.BackColor = System.Drawing.Color.FromArgb(((int)((byte)36)), ((int)((byte)14)), ((int)((byte)31)));
-            InputBox.ForeColor = System.Drawing.Color.White;
-            InputBox.Location = new System.Drawing.Point(30, 20);
+            InputBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            InputBox.BackColor = Color.FromArgb(36, 14, 31);
+            InputBox.Cursor = Cursors.IBeam;
+            InputBox.Font = new Font("Roboto", 12F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            InputBox.ForeColor = Color.White;
+            InputBox.Location = new Point(30, 20);
             InputBox.Name = "InputBox";
-            InputBox.Size = new System.Drawing.Size(450, 400);
+            InputBox.Size = new Size(450, 500);
             InputBox.TabIndex = 1;
             InputBox.Text = "";
             InputBox.TextChanged += NewInput;
             // 
             // ResultBox
             // 
-            ResultBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right));
-            ResultBox.BackColor = System.Drawing.Color.FromArgb(((int)((byte)36)), ((int)((byte)14)), ((int)((byte)31)));
-            ResultBox.ForeColor = System.Drawing.Color.Silver;
-            ResultBox.Location = new System.Drawing.Point(500, 20);
+            ResultBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ResultBox.BackColor = Color.FromArgb(36, 14, 31);
+            ResultBox.Font = new Font("Roboto", 12F);
+            ResultBox.ForeColor = Color.White;
+            ResultBox.Location = new Point(500, 20);
             ResultBox.Name = "ResultBox";
             ResultBox.ReadOnly = true;
-            ResultBox.Size = new System.Drawing.Size(450, 400);
+            ResultBox.Size = new Size(450, 500);
             ResultBox.TabIndex = 2;
             ResultBox.Text = "";
             // 
             // AnalyzerLabel
             // 
             AnalyzerLabel.AutoSize = true;
-            AnalyzerLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            AnalyzerLabel.ForeColor = System.Drawing.Color.White;
-            AnalyzerLabel.Location = new System.Drawing.Point(398, 11);
+            AnalyzerLabel.BorderStyle = BorderStyle.FixedSingle;
+            AnalyzerLabel.Font = new Font("Roboto", 12F);
+            AnalyzerLabel.ForeColor = Color.White;
+            AnalyzerLabel.Location = new Point(362, 11);
             AnalyzerLabel.Name = "AnalyzerLabel";
-            AnalyzerLabel.Size = new System.Drawing.Size(69, 17);
+            AnalyzerLabel.Size = new Size(96, 21);
             AnalyzerLabel.TabIndex = 3;
             AnalyzerLabel.Text = "Expressions";
             // 
             // ResultLabel
             // 
             ResultLabel.AutoSize = true;
-            ResultLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            ResultLabel.ForeColor = System.Drawing.Color.White;
-            ResultLabel.Location = new System.Drawing.Point(892, 11);
+            ResultLabel.BorderStyle = BorderStyle.FixedSingle;
+            ResultLabel.Font = new Font("Roboto", 12F);
+            ResultLabel.ForeColor = Color.White;
+            ResultLabel.Location = new Point(865, 11);
             ResultLabel.Name = "ResultLabel";
-            ResultLabel.Size = new System.Drawing.Size(46, 17);
+            ResultLabel.Size = new Size(63, 21);
             ResultLabel.TabIndex = 4;
             ResultLabel.Text = "Results";
             // 
             // Builder
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            BackColor = System.Drawing.Color.FromArgb(((int)((byte)48)), ((int)((byte)25)), ((int)((byte)52)));
-            ClientSize = new System.Drawing.Size(984, 561);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(48, 25, 52);
+            ClientSize = new Size(984, 561);
             Controls.Add(ResultLabel);
             Controls.Add(AnalyzerLabel);
             Controls.Add(ResultBox);
             Controls.Add(InputBox);
-            ForeColor = System.Drawing.Color.AliceBlue;
+            ForeColor = Color.AliceBlue;
+            Name = "Builder";
             Load += LoadBuilder;
             ResumeLayout(false);
             PerformLayout();
