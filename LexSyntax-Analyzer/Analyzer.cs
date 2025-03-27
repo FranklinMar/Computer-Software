@@ -4,7 +4,7 @@ namespace LexSyntax_Analyzer
     {   
         private Color BackgroundColour;
         private Font FontDefault;
-        public StateAnalyzer ExpressionAnalyzer { get; private set; }    
+        public SyntaxAnalyzer ExpressionAnalyzer { get; private set; }    
 
         public Analyzer()
         {

@@ -9,7 +9,7 @@ namespace ParallelTree_Builder
         private Color ForeColour;
         private Font FontDefault;
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public StateAnalyzer ExpressionAnalyzer { get; private set; }
+        public SyntaxAnalyzer ExpressionAnalyzer { get; private set; }
 
         public Builder()
         {
@@ -32,8 +32,8 @@ namespace ParallelTree_Builder
             if (ExpressionAnalyzer.Errors.Count == 0)
             {
                 TreeBuilder ParallelTree = new(ExpressionAnalyzer);
-                ResultBox.Text = ParallelTree.Root.Print();
-                ResultBox.Select(0, Box.Text.Length - 1);
+                ResultBox.Text = ParallelTree.Root != null ? ParallelTree.Root.Print() : "";
+                ResultBox.Select(0, ResultBox.Text.Length - 1);
                 ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
                 //ResultBox.ForeColor = Color.LightGreen;
                 Box.Select(0, Box.Text.Length);

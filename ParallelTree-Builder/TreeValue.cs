@@ -9,22 +9,6 @@ namespace ParallelTree_Builder
 {
     public class TreeValue: Tree
     {
-        //public string Value { get; protected set; }
-        /*private Category _Category { get; set; }
-
-        public Category Category
-        {
-            get => _Category;
-            set
-            {
-                if (value == Category.Unknown)
-                {
-                    throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Category));
-                }
-
-                _Category = value;
-            }
-        }*/
         public TreeValue(string Value, Category Category)
         {
             this.Value = Value;

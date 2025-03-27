@@ -32,13 +32,6 @@ namespace ParallelTree_Builder
             this.Values = Values;
             this.Signs = Signs;
         }
-        /*public TreeMultiNode(string Value, Category Category, List<Token> Tokens)
-        {
-            this.Value = Value;
-            this.Category = Category;
-            *//*this.Values = Values;
-            this.Signs = Signs;*//*
-        }*/
         public void Sort()
         {
             QuickSort(Values, Signs, 0, Values.Count - 1);
@@ -62,7 +55,7 @@ namespace ParallelTree_Builder
             int i = Begin - 1;
             for (int j = Begin; j < End; j++)
             {
-                if (Values[j].Category != Last.Category || Signs[j] != LastBool)//(Values[j] <= last)
+                if (Values[j].Category != Last.Category || Signs[j] != LastBool) // (Values[j] <= Last)
                 {
                     i++;
                     Exchange(Values, Signs, i, j);

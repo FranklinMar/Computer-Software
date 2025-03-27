@@ -4,24 +4,6 @@ using LexSyntax_Analyzer;
 namespace ParallelTree_Builder;
 
 public class TreeNode: Tree {
-    
-    //public new string Value { get; protected set; }
-    /*private Category _Category { get; set; }
-
-    public Category Category
-    {
-        get => _Category;
-        set
-        {
-            if (value == Category.Unknown)
-            {
-                throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Category));
-            }
-
-            _Category = value;
-        }
-    }*/
-    // public bool IsObject => Category is "num" or "name";
 
     private Tree _Left { get; set; }
     private Tree _Right { get; set; }
@@ -36,38 +18,6 @@ public class TreeNode: Tree {
                 throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
             }
 
-            //if (value != null && _Right == null)
-            //{
-            //    throw new ArgumentException("Lone value in binary operator", nameof(Left));
-            //}
-            /*if (_Token.Category is not "name" or "num" && value !=null)
-            {
-                Queue<TreeNode> Queue = new();
-                Queue.Enqueue(value);
-                TreeNode Node;
-                while (Queue.Count != 0)
-                {
-                    Node = Queue.Dequeue();
-                    if (Node.Left != null)
-                    {
-                        Queue.Enqueue(Node.Left);
-                    }
-                    else if (Node.Token.IsOp && Node.Right == null)
-                    {
-                        throw new ArgumentException("Empty operator without operands.", nameof(Left));
-                    }
-                    else if (Node.Value != "-" && Node.Right != null)
-                    {
-                        throw new ArgumentException("Non-unary operator without second operand.", nameof(Left));
-                    }
-
-                    if (Node.Right != null)
-                    {
-                        Queue.Enqueue(Node.Right);
-                    }
-                }
-            }*/
-
             _Left = value;
         }
     }
@@ -81,95 +31,17 @@ public class TreeNode: Tree {
             {
                 throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
             }
-
-            //if (value != null && _Left == null)
-            //{
-            //    throw new ArgumentException("Lone value in binary operator", nameof(Right));
-            //}
-            /*if (_Token.Category is not "name" or "num" && value !=null)
-            {
-                Queue<TreeNode> Queue = new();
-                Queue.Enqueue(value);
-                TreeNode Node;
-                while (Queue.Count != 0)
-                {
-                    Node = Queue.Dequeue();
-                    if (Node.Left != null)
-                    {
-                        Queue.Enqueue(Node.Left);
-                    }
-                    else if (Node.Token.IsOp && Node.Right == null)
-                    {
-                        throw new ArgumentException("Empty operator without operands.", nameof(Left));
-                    }
-                    else if (Node.Value != "-" && Node.Right != null)
-                    {
-                        throw new ArgumentException("Non-unary operator without second operand.", nameof(Left));
-                    }
-
-                    if (Node.Right != null)
-                    {
-                        Queue.Enqueue(Node.Right);
-                    }
-                }
-            }*/
             _Right = value;
         }
     }
-
-
-    /*public TreeNode(string Value, Category Category)
-    {
-        this.Value = Value;
-        this.Category = Category;
-    }*/
-
-    /*public TreeNode(Token Token, TreeNode? Right)
-    {
-        this.Token = Token;
-        Left = null;
-        this.Right = Right;
-    }*/
 
     public TreeNode(string Value, Category Category, Tree Left, Tree Right)
     {
         this.Value = Value;
         this.Category = Category;
-        //if (Category.HasFlag(Category.Object))
-        //{
-        //    if (Left != null)
-        //    {
-        //        throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
-        //    }
-        //    if (Right != null)
-        //    {
-        //        throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
-        //    }
-        //}
         _Left = Left;
         _Right = Right;
-        //if (IsOp)
-        //{
-        //    if (Left == null)
-        //    {
-        //        throw new ArgumentException("Lone value in binary operator", nameof(Left));
-        //    }
-        //    if (Right == null)
-        //    {
-        //        throw new ArgumentException("Lone value in binary operator", nameof(Right));
-        //    }
-        //}
     }
-
-    /*private string PrintTree(StringBuilder Builder, string Prefix)
-    {
-        string Current;
-        Builder.Append(Prefix + Value.Value);
-        if (Left != null && Right != null)
-        {
-            //Left.PrintTree(Prefix + "| ")
-        }
-    }*/
 
     public override string ToString()
     {
@@ -193,15 +65,8 @@ public class TreeNode: Tree {
         Builder.Append($"\'{Value}\'\n");
 
         var Children = new List<Tree>();
-        //if (Left != null)
-        //{
         Children.Add(Left); 
-        //}
-
-        //if (Right != null)
-        //{
         Children.Add(Right);
-        //}
 
         for (int i = 0; i < Children.Count; i++)
         {
@@ -212,12 +77,12 @@ public class TreeNode: Tree {
     public void Traverse(Action<Tree> Func)
     {
         Func(this);
-        if (/*Left != null*/ Left is TreeNode)
+        if (Left is TreeNode)
         {
             ((TreeNode) Left).Traverse(Func);
         }
 
-        if (/*Right != null*/Right is TreeNode)
+        if (Right is TreeNode)
         {
             ((TreeNode) Right).Traverse(Func);
         }
