@@ -31,15 +31,27 @@ namespace ParallelTree_Builder
             ExpressionAnalyzer = new(Box.Text);
             if (ExpressionAnalyzer.Errors.Count == 0)
             {
-                TreeBuilder ParallelTree = new(ExpressionAnalyzer);
-                ResultBox.Text = ParallelTree.Root != null ? ParallelTree.Root.Print() : "";
-                ResultBox.Select(0, ResultBox.Text.Length - 1);
-                ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
-                //ResultBox.ForeColor = Color.LightGreen;
+                Color Color = Color.LightGreen;
+                try
+                {
+                    TreeBuilder ParallelTree = new(ExpressionAnalyzer);
+                    ResultBox.Text = ParallelTree.Root != null ? ParallelTree.Root.Print() : "";
+                    ResultBox.Select(0, ResultBox.Text.Length);
+                    ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
+                    ResultBox.ForeColor = Color.Snow;
+                }
+                catch (DivideByZeroException Exception)
+                {
+                    ResultBox.Text = "Error: Division by zero. Impossible operation";
+                    ResultBox.Select(0, ResultBox.Text.Length);
+                    ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
+                    ResultBox.ForeColor = Color.Red;
+                    Color = Color.Snow;
+                }
                 Box.Select(0, Box.Text.Length);
-                Box.ForeColor = Color.LightGreen;
                 Box.BackColor = BackgroundColour;
                 Box.SelectionBackColor = BackgroundColour;
+                Box.ForeColor = Color;
                 Box.Select(Box.Text.Length, 0);
             }
             else
@@ -53,8 +65,8 @@ namespace ParallelTree_Builder
                 }
                 // ResultBox.Text = string.Join("\n#1:\t", Errors.Select(Err => Err.Message));
                 Box.Select(0, Box.Text.Length);
-                Box.ForeColor = Color.White;
-                Box.SelectionColor = Color.White;
+                Box.ForeColor = Color.Snow;
+                Box.SelectionColor = Color.Snow;
                 foreach (var Error in Errors)
                 {
                     Box.Select(Error.Index, Error.Length);

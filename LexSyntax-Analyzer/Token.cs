@@ -18,11 +18,9 @@ namespace LexSyntax_Analyzer
         Parenthesis = 32, // 100000
     }
 
-    public class Token(string Value,/* string*/Category Category, int Index)
+    public class Token(string Value, Category Category, int Index)
     {
         public string Value { get; private set; } = Value;
-
-        //public string Category { get; } = Category;
 
         public Category Category { get; } = Category;
 
@@ -40,7 +38,7 @@ namespace LexSyntax_Analyzer
             }
         }
 
-        public bool IsOp => Category.HasFlag(Category.Op);//Category.StartsWith("op");
+        public bool IsOp => Category.HasFlag(Category.Op);
 
         override public string ToString() => Value;
     }
