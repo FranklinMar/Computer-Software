@@ -37,14 +37,14 @@ namespace ParallelTree_Builder
                     TreeBuilder ParallelTree = new(ExpressionAnalyzer);
                     ResultBox.Text = ParallelTree.Root != null ? ParallelTree.Root.Print() : "";
                     ResultBox.Select(0, ResultBox.Text.Length);
-                    ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
+                    //ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
                     ResultBox.ForeColor = Color.Snow;
                 }
                 catch (DivideByZeroException Exception)
                 {
                     ResultBox.Text = "Error: Division by zero. Impossible operation";
                     ResultBox.Select(0, ResultBox.Text.Length);
-                    ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
+                    //ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
                     ResultBox.ForeColor = Color.Red;
                     Color = Color.Snow;
                 }

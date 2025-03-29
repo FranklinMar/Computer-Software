@@ -55,42 +55,9 @@ public class TreeBuilder
             }
             else
             {
-                /*if ("+-/*".Contains(PostFix[i].Value))
-                {
-                    int j;
-                    List<Tree> Values = new List<Tree>();
-                    List<bool> Signs = new List<bool>();
-                    for (j = i; j < PostFix.Count; j++)
-                    {
-                        if (PostFix[j].IsOp && Priorities[PostFix[j].Value] != Priorities[PostFix[i].Value])
-                        {
-                            break;
-                        }
-                        else if (PostFix[j].IsOp)
-                        {
-                            Signs.Insert(0, !IsNegative(PostFix[j].Value));
-                        }
-                        else
-                        {
-                            Values.Insert(0, TreeStack.Pop());
-                            //Values.Insert(0, new TreeValue(PostFix[j].Value, PostFix[j].Category));
-                        }
-                    }
-
-                    TreeNode = new MultiOperator(IsNegative(PostFix[i].Value) ? OppositeOp[PostFix[i].Value] : PostFix[i].Value, Values, Signs);
-                    i = j - 1;
-                }
-                else
-                {
-                    var Right = TreeStack.Pop();
-                    var Left = TreeStack.Pop();
-                    TreeNode = new TreeNode(PostFix[i].Value, PostFix[i].Category, Left, Right);
-                }*/
                 var Right = TreeStack.Pop();
                 var Left = TreeStack.Pop();
                 TreeNode = new TreeNode(PostFix[i].Value, PostFix[i].Category, Left, Right);
-                Left.Parent = TreeNode;
-                Right.Parent = TreeNode;
             }
             TreeStack.Push(TreeNode);
         }
@@ -116,7 +83,7 @@ public class TreeBuilder
             CurrentMulti.Sort();
 
             Root = ToTreeNodeTree(CurrentMulti);
-            Root = OptimizeConstants(Root);
+            Root = OptimizeConstants(Root, true);
 
             if (Root is TreeNode)
             {
@@ -126,7 +93,7 @@ public class TreeBuilder
                     if (Tree is TreeNode)
                     {
                         TreeNode Leaf = (TreeNode)Tree;
-                        if (Leaf.Value is "/" or "%" && Leaf.Right.Category == Category.Number && Math.Abs(double.Parse(Leaf.Right.Value)) < double.Epsilon)
+                        if (Leaf.Value is "/" or "%" && Leaf.Right.Category == Category.Number && Leaf.Right.Value == "0")
                         {
                             throw new DivideByZeroException("Cannot divide by 0");
                         }
@@ -204,7 +171,7 @@ public class TreeBuilder
             string NewSign = IsNegative(Node.Value) ? OppositeOp[Node.Value] : Node.Value;
             List<Tree> InnerMultiNodes = new();
             List<bool> InnerMultiSigns = new();
-            ToMultiNodeTree(Node, NewSign, Category, InnerMultiNodes, InnerMultiSigns/*, TreeNode*/, Negate);
+            ToMultiNodeTree(Node, NewSign, Category, InnerMultiNodes, InnerMultiSigns/*, TreeNode*/);
             MultiNodes.Add(new TreeMultiNode(NewSign, Category, InnerMultiNodes, InnerMultiSigns));
             MultiSigns.Add(Negate);
         }
@@ -218,7 +185,7 @@ public class TreeBuilder
             string NewSign = IsNegative(Node.Value) ? OppositeOp[Node.Value] : Node.Value;
             List<Tree> NewMultiOpNodes = new();
             List<bool> NewMultiOpSigns = new();
-            ToMultiNodeTree(Node, NewSign, Node.Category, NewMultiOpNodes, NewMultiOpSigns/*, Layer + 1*/, IsNegative(TreeNode.Value) ^ Negate);
+            ToMultiNodeTree(Node, NewSign, Node.Category, NewMultiOpNodes, NewMultiOpSigns);
             MultiNodes.Add(new TreeMultiNode(NewSign, Node.Category, NewMultiOpNodes, NewMultiOpSigns));
             MultiSigns.Add(!(IsNegative(TreeNode.Value) ^ Negate));
         }
@@ -226,22 +193,8 @@ public class TreeBuilder
         {
             MultiNodes.Insert(0, TreeNode.Left);
             MultiSigns.Insert(0, !Negate);
-            /*if (Layer == 0)
-            {
-                MultiSigns.Add(true);
-            }
-            else
-            {
-                //ERROR
-                MultiSigns.Add(!IsNegative(TreeNode.Parent?.Value));
-            }*/
         }
-        /*if (TreeNode.Left is TreeNode && Priorities[((TreeNode)TreeNode.Left).Value] != Priorities[Sign])
-        {
-
-        }*/
-        if (TreeNode.Right is TreeValue || (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] > 2)/* || TreeNode.Right is TreeNode && Priorities[((TreeNode)TreeNode.Right).Value] != Priorities[Sign]*/)
-        //if (TreeNode.Right is Tree)
+        if (TreeNode.Right is TreeValue || (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] > 2)
         {
             MultiNodes.Add(TreeNode.Right);
             MultiSigns.Add(!(IsNegative(TreeNode.Value) ^ Negate));
@@ -250,7 +203,6 @@ public class TreeBuilder
 
     public Tree ToTreeNodeTree(TreeMultiNode Tree)
     {
-        //int Middle = Math.Max(((Tree.Values.Count + 1) / 2) / 2 * 2 - 1, 0);\
         if (Tree.Values.Count == 0)
         {
             throw new ArgumentException("Cannot create empty tree");
@@ -260,7 +212,6 @@ public class TreeBuilder
             {
                 return ToTreeNodeTree((TreeMultiNode) Tree.Values[0]);
             }
-            //return new TreeValue(Tree.Signs[0] ? Tree.Value : OppositeOp[Tree.Value], Tree.Category);
             return Tree.Values[0];
         } else if (Tree.Values.Count == 2)
         {
@@ -271,7 +222,7 @@ public class TreeBuilder
         int Middle = (Tree.Values.Count + 1) / 2;
         Tree Left = ToTreeNodeTree(new TreeMultiNode(Tree.Value, Tree.Category, Tree.Values[..Middle], Tree.Signs[..Middle]));
         Tree Right;
-        if (/*Priorities[Tree.Value] == 2 && */!Tree.Signs[Middle])
+        if (!Tree.Signs[Middle])
         {
             Right = ToTreeNodeTree(new TreeMultiNode(Tree.Value, Tree.Category, Tree.Values[Middle..], Tree.Signs[Middle..].Select(item => !item).ToList()));
             return new TreeNode(OppositeOp[Tree.Value], Tree.Category, Left, Right);
@@ -282,7 +233,7 @@ public class TreeBuilder
         }
     }
 
-    public Tree OptimizeConstants(Tree Tree)
+    public Tree OptimizeConstants(Tree Tree, bool SeparateNegative = false)
     {
         if (Tree == null)
         {
@@ -326,23 +277,35 @@ public class TreeBuilder
                         "^" => Math.Pow(Left, Right),
                         _ => throw new DataException($"Couldn't parse expression: {Leaf.Value}")
                     };
-
-                    NewNode = new TreeValue($"{Temp}", Category.Number);
-
+                    if (Temp < 0 && SeparateNegative)
+                    {
+                        NewNode = new TreeNode("-", Category.Op, new TreeValue("0", Category.Number), new TreeValue(Math.Abs((decimal)Temp).ToString("G29"), Category.Number));
+                    }
+                    else
+                    {
+                        NewNode = new TreeValue(((decimal) Temp).ToString("G29"), Category.Number);
+                    }
                 }
                 else if (Leaf.Left.Category == Category.Name && Leaf.Right.Category == Category.Number ||
                          Leaf.Left.Category == Category.Number && Leaf.Right.Category == Category.Name)
                 {
-                    if ((Leaf.Value is "+" && (Leaf.Left.Value == "0" || Leaf.Right.Value == "0")) || 
+                    //double Left = double.Parse(Leaf.Left.Value.Replace('.', ',')), Right = double.Parse(Leaf.Right.Value.Replace('.', ','));
+                    if ((Leaf.Value is "+" && (Leaf.Left.Value == "0" || Leaf.Right.Value == "0")) ||
                         Leaf is { Value: "-", Right.Value: "0" })
                     {
                         NewNode = Leaf.Left.Value != "0" ? Leaf.Left : Leaf.Right;
                     }
-                    else if (Leaf.Value is "*" or "/" or "%" && (Leaf.Left.Value == "0" || Leaf.Right.Value == "0"))   
+                    else if (Leaf.Value is "*" or "/" or "%" &&
+                        /*(Left <= double.Epsilon || // Left == 0 ||
+                        Right <= double.Epsilon)) // Right == 0*/
+                        (Leaf.Left.Value == "0" || Leaf.Right.Value == "0"))
                     {
-                        NewNode = Leaf.Left.Value == "0" ? Leaf.Left : Leaf.Right;
+                        NewNode = Leaf.Left.Value == "0" /*Math.Abs(Left) <= double.Epsilon*/ ? Leaf.Left : Leaf.Right; // Left == 0 ? ...
                     }
-                    else if ((Leaf.Value is "*" && (Leaf.Left.Value == "1" || Leaf.Right.Value == "1")) || 
+                    else if ((Leaf.Value is "*" &&
+                            /*(Left - 1 <= double.Epsilon || // Left == 1
+                            Right - 1 <= double.Epsilon)) // Right == 1*/
+                            (Leaf.Left.Value == "1" || Leaf.Right.Value == "1")) ||
                              Leaf is { Value: "/", Right.Value: "1" })
                     {
                         NewNode = Leaf.Left.Value != "1" ? Leaf.Left : Leaf.Right;
@@ -394,161 +357,4 @@ public class TreeBuilder
 
         return Tree;
     }
-    /*private Tree Optimize(Tree Root)
-    {
-        if (Root == null || !Root.IsOp)
-        {
-            return Root;
-        }
-	    List<string> Expressions = new();
-        List<Tree> CornerNodes = new();
-        Tree Node = Root;
-        List<Tree> RootNodes = new();
-        List <Token> Tokens;
-        List<Token> PositiveTokens, NegativeTokens;
-
-        string Sign = Root.Value;
-        Category Category = Root.Category;
-
-        string Current = "";
-        TraverseTree(Node, Sign, ref RootNodes, ref Current);
-        Tokens = new StateAnalyzer(Current).Tokens;
-        PositiveTokens = new() { Tokens[0] };
-        NegativeTokens = new();
-        for (int i = 1; i < Tokens.Count; i += 2)
-        {
-            if (IsNegative(Tokens[i].Value))
-            {
-                NegativeTokens.Add(Tokens[i]);
-                NegativeTokens.Add(Tokens[i + 1]);
-            }
-            else
-            {
-                PositiveTokens.Add(Tokens[i]);
-                PositiveTokens.Add(Tokens[i + 1]);
-            }
-        }
-        PositiveTokens.AddRange(NegativeTokens);
-        Tree Merged = SplitMerge(PositiveTokens);
-
-        RootNodes.Add(Merged);
-        Root = SplitMerge(RootNodes, Sign, Category);
-
-        Root = OptimizeConstants(Root);
-        return Root;
-    }
-
-    private void TraverseTree(Tree Node, string Sign, ref List<Tree> RootNodes, ref string Current)
-    {
-        if (Node is TreeNode)
-        {
-            TreeNode TreeNode = (TreeNode)Node;
-            if (TreeNode.Left.IsOp && Priorities[TreeNode.Left.Value] == Priorities[Sign] && Priorities[Node.Value] != 3)
-            {
-                TraverseTree(TreeNode.Left, Sign, ref RootNodes, ref Current);
-            }
-            if (TreeNode.Right.IsOp && Priorities[TreeNode.Right.Value] == Priorities[Sign] && Priorities[Node.Value] != 3)
-            {
-                TraverseTree(TreeNode.Right, Sign, ref RootNodes, ref Current);
-            }
-            if (TreeNode.Left.IsOp && Priorities[TreeNode.Left.Value] != Priorities[Sign])
-            {
-                RootNodes.Add(TreeNode.Left);
-            }
-            if (TreeNode.Right.IsOp && Priorities[TreeNode.Right.Value] != Priorities[Sign])
-            {
-                RootNodes.Add(TreeNode.Right);
-            }
-            if (TreeNode.Left.Category.HasFlag(Category.Object) && TreeNode.Right.Category.HasFlag(Category.Object))
-            {
-                Current = TreeNode.Left.Value + Node.Value + TreeNode.Right.Value;
-            }
-            else if (TreeNode.Left.Category.HasFlag(Category.Object))
-            {
-                if (TreeNode.Right.IsOp && Priorities[TreeNode.Right.Value] == Priorities[Sign] && Priorities[Node.Value] != 3)
-                {
-                    Current = TreeNode.Left.Value + Node.Value + Current;
-                }
-                else
-                {
-                    Current = TreeNode.Left.Value;
-                }
-            }
-            else if (TreeNode.Right.Category.HasFlag(Category.Object))
-            {
-                if (TreeNode.Left.IsOp && Priorities[TreeNode.Left.Value] == Priorities[Sign] && Priorities[Node.Value] != 3)
-                {
-                    Current += Node.Value + TreeNode.Right.Value;
-                }
-                else
-                {
-                    Current = TreeNode.Right.Value;
-                }
-            }
-        }
-    }
-
-    private Tree SplitMerge(List<Tree> Nodes, string Sign, Category Category)
-    {
-        if (Nodes.Count == 0)
-        {
-            throw new ArgumentException("EMPTY!");
-        } else if (Nodes.Count == 1)
-        {
-            return Nodes[0];
-        }
-        else if (Nodes.Count == 2)
-        {
-            return new TreeNode(Sign, Category, Nodes[0], Nodes[1]);
-        }
-        int Middle = (Nodes.Count - 1) / 2;
-        //int Middle = Math.Max(((Nodes.Count + 1) / 2) / 2 * 2 - 1, 0);
-
-        TreeNode Root = new(Sign, Category,
-                SplitMerge(Nodes.GetRange(0, Middle), Sign, Category),
-                SplitMerge(Nodes.GetRange(Middle, Nodes.Count - Middle), Sign, Category));
-
-        return Root;
-    }
-
-    private Tree SplitMerge(List<Token> Tokens)
-    {
-        if (Tokens.Count == 0)
-        {
-            return null;
-        }
-        int Middle = 0;
-        if (Tokens.Count > 1)
-        {
-            string Operation = Tokens[1].Value;
-            bool SameOperations = true;
-            for (int i = 1; i < Tokens.Count; i += 2)
-            {
-                if (Tokens[i].Value != Operation)
-                {
-                    SameOperations = false;
-                    Middle = i;
-                }
-                if (!SameOperations)
-                {
-                    Tokens[i] = new Token(OppositeOp[Tokens[i].Value], Tokens[i].Category, Tokens[i].Index);
-                }
-            }
-            if (SameOperations)
-            {
-                Middle = Math.Max(((Tokens.Count + 1) / 2) / 2 * 2 - 1, 0);
-            }
-        } else
-        {
-            return new TreeValue(Tokens[0].Value, Tokens[0].Category);
-        }
-        Token MiddleToken = Tokens[Middle];
-
-        TreeNode Root = new(MiddleToken.Value,
-                MiddleToken.Category,
-                SplitMerge(Tokens.GetRange(0, Middle)),
-                SplitMerge(Tokens.GetRange(Middle + 1, Tokens.Count - Middle - 1)));
-
-        return Root;
-    }*/
 }
