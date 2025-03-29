@@ -89,7 +89,8 @@ public class TreeBuilder
                 var Right = TreeStack.Pop();
                 var Left = TreeStack.Pop();
                 TreeNode = new TreeNode(PostFix[i].Value, PostFix[i].Category, Left, Right);
-
+                Left.Parent = TreeNode;
+                Right.Parent = TreeNode;
             }
             TreeStack.Push(TreeNode);
         }
@@ -99,12 +100,10 @@ public class TreeBuilder
         {
             return;
         }
-
-        Tree Current = Root;
         Root = OptimizeConstants(Root);
-        if (Current is TreeNode && Priorities[((TreeNode) Current).Value] <= 2)
+        if (Root is TreeNode && Priorities[((TreeNode) Root).Value] <= 2)
         {
-            TreeNode Node = (TreeNode) Current;
+            TreeNode Node = (TreeNode) Root;
             string Sign = IsNegative(Node.Value) ? OppositeOp[Node.Value] : Node.Value;
             Category Category = Node.Category;
             List <Tree> BinaryTreeQueue = new List<Tree>();
@@ -193,39 +192,25 @@ public class TreeBuilder
         return PostFixStack.Reverse().ToList();
     }
 
-    public void ToMultiNodeTree(TreeNode TreeNode, string Sign, Category Category, List<Tree> MultiNodes, List<bool> MultiSigns)
+    public void ToMultiNodeTree(TreeNode TreeNode, string Sign, Category Category, List<Tree> MultiNodes, List<bool> MultiSigns/*, int Layer = 0*/, bool Negate = false)
     {
-        if (TreeNode.Left is TreeValue || (TreeNode.Left is TreeNode && Priorities[TreeNode.Left.Value] > 2)) 
-        {
-            MultiNodes.Insert(0, TreeNode.Left);
-            MultiSigns.Insert(0, true);
-        }
-        /*if (TreeNode.Left is TreeNode && Priorities[((TreeNode)TreeNode.Left).Value] != Priorities[Sign])
-        {
-
-        }*/
         if (TreeNode.Left is TreeNode && Priorities[TreeNode.Left.Value] == Priorities[Sign])
         {
-            ToMultiNodeTree((TreeNode) TreeNode.Left, Sign, Category, MultiNodes, MultiSigns);
-        } else if (TreeNode.Left is TreeNode)
+            ToMultiNodeTree((TreeNode)TreeNode.Left, Sign, Category, MultiNodes, MultiSigns/*, Layer + 1*/, Negate);
+        }
+        else if (TreeNode.Left is TreeNode)
         {
-            TreeNode Node = (TreeNode) TreeNode.Left;
+            TreeNode Node = (TreeNode)TreeNode.Left;
             string NewSign = IsNegative(Node.Value) ? OppositeOp[Node.Value] : Node.Value;
             List<Tree> InnerMultiNodes = new();
             List<bool> InnerMultiSigns = new();
-            ToMultiNodeTree(Node, NewSign, Category, InnerMultiNodes, InnerMultiSigns);
-            MultiNodes.Insert(0, new TreeMultiNode(NewSign, Category, InnerMultiNodes, InnerMultiSigns));
-            MultiSigns.Insert(0, !IsNegative(TreeNode.Value));
-        }
-        if (TreeNode.Right is TreeValue || (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] > 2)/* || TreeNode.Right is TreeNode && Priorities[((TreeNode)TreeNode.Right).Value] != Priorities[Sign]*/)
-        //if (TreeNode.Right is Tree)
-        {
-            MultiNodes.Add(TreeNode.Right);
-            MultiSigns.Add(!IsNegative(TreeNode.Value));
+            ToMultiNodeTree(Node, NewSign, Category, InnerMultiNodes, InnerMultiSigns/*, TreeNode*/, Negate);
+            MultiNodes.Add(new TreeMultiNode(NewSign, Category, InnerMultiNodes, InnerMultiSigns));
+            MultiSigns.Add(Negate);
         }
         if (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] == Priorities[Sign])
         {
-            ToMultiNodeTree((TreeNode) TreeNode.Right, Sign, Category, MultiNodes, MultiSigns);
+            ToMultiNodeTree((TreeNode)TreeNode.Right, Sign, Category, MultiNodes, MultiSigns/*, Layer + 1*/, IsNegative(TreeNode.Value) ^ Negate);
         }
         else if (TreeNode.Right is TreeNode)
         {
@@ -233,9 +218,33 @@ public class TreeBuilder
             string NewSign = IsNegative(Node.Value) ? OppositeOp[Node.Value] : Node.Value;
             List<Tree> NewMultiOpNodes = new();
             List<bool> NewMultiOpSigns = new();
-            ToMultiNodeTree(Node, NewSign, Node.Category, NewMultiOpNodes, NewMultiOpSigns);
+            ToMultiNodeTree(Node, NewSign, Node.Category, NewMultiOpNodes, NewMultiOpSigns/*, Layer + 1*/, IsNegative(TreeNode.Value) ^ Negate);
             MultiNodes.Add(new TreeMultiNode(NewSign, Node.Category, NewMultiOpNodes, NewMultiOpSigns));
-            MultiSigns.Add(!IsNegative(TreeNode.Value));
+            MultiSigns.Add(!(IsNegative(TreeNode.Value) ^ Negate));
+        }
+        if (TreeNode.Left is TreeValue || (TreeNode.Left is TreeNode && Priorities[TreeNode.Left.Value] > 2)) 
+        {
+            MultiNodes.Insert(0, TreeNode.Left);
+            MultiSigns.Insert(0, !Negate);
+            /*if (Layer == 0)
+            {
+                MultiSigns.Add(true);
+            }
+            else
+            {
+                //ERROR
+                MultiSigns.Add(!IsNegative(TreeNode.Parent?.Value));
+            }*/
+        }
+        /*if (TreeNode.Left is TreeNode && Priorities[((TreeNode)TreeNode.Left).Value] != Priorities[Sign])
+        {
+
+        }*/
+        if (TreeNode.Right is TreeValue || (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] > 2)/* || TreeNode.Right is TreeNode && Priorities[((TreeNode)TreeNode.Right).Value] != Priorities[Sign]*/)
+        //if (TreeNode.Right is Tree)
+        {
+            MultiNodes.Add(TreeNode.Right);
+            MultiSigns.Add(!(IsNegative(TreeNode.Value) ^ Negate));
         }
     }
 
