@@ -5,18 +5,6 @@ namespace ParallelTree_Builder
     public abstract class Tree
     {
         public string Value { get; protected set; }
-        private Category _Category;
-        public Category Category {
-            get => _Category;
-            protected set {
-                    if (value == Category.Unknown)
-                    {
-                        throw new ArgumentException("Unknown tokens are not acceptable in expression trees.", nameof(Category));
-                    }
-                    _Category = value;
-                }
-            }
-        public bool IsOp => Category.HasFlag(Category.Op);
 
         public string Print()
         {

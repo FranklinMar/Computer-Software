@@ -5,10 +5,9 @@ namespace ParallelTree_Builder
 {
     public class TreeValue: Tree
     {
-        public TreeValue(string Value, Category Category)
+        public TreeValue(string Value)
         {
             this.Value = Value;
-            this.Category = Category;
         }
 
         public override string ToString()

@@ -13,9 +13,9 @@ public class TreeNode: Tree {
         get => _Left;
         set
         {
-            if (Category.HasFlag(Category.Object) && value != null)
+            if (value == null)
             {
-                throw new ArgumentException("Value nodes cannot have children.", nameof(Left));
+                throw new ArgumentException("Children leaves nodes cannot be empty.", nameof(Left));
             }
 
             _Left = value;
@@ -27,18 +27,17 @@ public class TreeNode: Tree {
         get => _Right;
         set
         {
-            if (Category.HasFlag(Category.Object) && value != null)
+            if (value == null)
             {
-                throw new ArgumentException("Value nodes cannot have children.", nameof(Right));
+                throw new ArgumentException("Children leaves nodes cannot be empty.", nameof(Right));
             }
             _Right = value;
         }
     }
 
-    public TreeNode(string Value, Category Category, Tree Left, Tree Right)
+    public TreeNode(string Value, Tree Left, Tree Right)
     {
         this.Value = Value;
-        this.Category = Category;
         _Left = Left;
         _Right = Right;
     }

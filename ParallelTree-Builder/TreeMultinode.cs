@@ -21,10 +21,9 @@ namespace ParallelTree_Builder
                 _Signs = value;
             }
         }
-        public TreeMultiNode(string Value, Category Category, List<Tree> Values, List<bool> Signs)
+        public TreeMultiNode(string Value, List<Tree> Values, List<bool> Signs)
         {
             this.Value = Value;
-            this.Category = Category;
             this.Values = Values;
             this.Signs = Signs;
         }
@@ -51,7 +50,7 @@ namespace ParallelTree_Builder
             int i = Begin - 1;
             for (int j = Begin; j < End; j++)
             {
-                if (Values[j].Category != Last.Category || Signs[j] != LastBool) // (Values[j] <= Last)
+                if (Signs[j] != LastBool) // (Values[j] <= Last)
                 {
                     i++;
                     Exchange(Values, Signs, i, j);
