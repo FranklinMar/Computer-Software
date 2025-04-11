@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexSyntax-Analyzer", "LexSyntax-Analyzer\LexSyntax-Analyzer.csproj", "{38CB6C82-0078-40FB-B52F-76D4F94E35F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LexSyntax-Analyzer", "LexSyntax-Analyzer\LexSyntax-Analyzer.csproj", "{38CB6C82-0078-40FB-B52F-76D4F94E35F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParallelTree-Builder", "ParallelTree-Builder\ParallelTree-Builder.csproj", "{8A54F114-AE8C-43BC-B8C6-A498E394D99F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParallelTree-Builder", "ParallelTree-Builder\ParallelTree-Builder.csproj", "{8A54F114-AE8C-43BC-B8C6-A498E394D99F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlgebraicLaws", "AlgebraicLaws\AlgebraicLaws.csproj", "{0366140A-E4D8-4D7F-B379-8B440AD50084}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoftwareComputerSystem", "SoftwareComputerSystem\SoftwareComputerSystem.csproj", "{F71145AA-0EBA-49B9-A0B0-634D8247BADB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{8A54F114-AE8C-43BC-B8C6-A498E394D99F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A54F114-AE8C-43BC-B8C6-A498E394D99F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A54F114-AE8C-43BC-B8C6-A498E394D99F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0366140A-E4D8-4D7F-B379-8B440AD50084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0366140A-E4D8-4D7F-B379-8B440AD50084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0366140A-E4D8-4D7F-B379-8B440AD50084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0366140A-E4D8-4D7F-B379-8B440AD50084}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F71145AA-0EBA-49B9-A0B0-634D8247BADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F71145AA-0EBA-49B9-A0B0-634D8247BADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F71145AA-0EBA-49B9-A0B0-634D8247BADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F71145AA-0EBA-49B9-A0B0-634D8247BADB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
