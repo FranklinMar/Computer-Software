@@ -34,8 +34,9 @@ namespace ParallelTree_Builder
                 Color Color = Color.LightGreen;
                 try
                 {
-                    TreeBuilder ParallelTree = new(ExpressionAnalyzer);
-                    ResultBox.Text = ParallelTree.Root != null ? ParallelTree.Root.Print() : "";
+                    //TreeBuilder ParallelTree = new(ExpressionAnalyzer);
+                    Tree Root = TreeBuilder.Parse(ExpressionAnalyzer);
+                    ResultBox.Text = Root != null ? Root.Print() : "";
                     ResultBox.Select(0, ResultBox.Text.Length);
                     //ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
                     ResultBox.ForeColor = Color.Snow;

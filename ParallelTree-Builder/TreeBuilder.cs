@@ -4,10 +4,10 @@ using LexSyntax_Analyzer;
 
 namespace ParallelTree_Builder;
 
-public class TreeBuilder
+public static class TreeBuilder
 {
-    private SyntaxAnalyzer Analyzer;
-    public Tree Root { get; private set; }
+    //private SyntaxAnalyzer Analyzer;
+    //public Tree Root { get; private set; }
 
     private static Dictionary<string, int> Priorities = new()
     {
@@ -27,7 +27,7 @@ public class TreeBuilder
         { "/", "*" }
     };
 
-    private double CalculateOperation(string Operation, double Left, double Right)
+    private static double CalculateOperation(string Operation, double Left, double Right)
     {
         return Operation switch
                     {
@@ -43,15 +43,16 @@ public class TreeBuilder
 
     private static bool IsNegative(string Operator) => Negatives.Contains(Operator);
 
-    public TreeBuilder(SyntaxAnalyzer Analyzer)
+    public static Tree Parse(SyntaxAnalyzer Analyzer)
     {
-        this.Analyzer = Analyzer;
-        if (this.Analyzer.Errors.Count > 0)
+        //this.Analyzer = Analyzer;
+        Tree Root;
+        if (Analyzer.Errors.Count > 0)
         {
             throw new ArgumentException("No errors allowed in expression tree", nameof(Analyzer));
         }
 
-        var PostFix = ToPostfixList(this.Analyzer.Tokens);
+        var PostFix = ToPostfixList(Analyzer.Tokens);
 
         PostFix.ForEach(Token => Debug.Write(Token.Value + ", "));
 
@@ -75,18 +76,14 @@ public class TreeBuilder
 
         if (Root == null)
         {
-            return;
+            return Root;
         }
         Root = OptimizeConstants(Root);
         if (Root is TreeNode && Priorities[((TreeNode)Root).Value] <= 2)
         {
             TreeNode Node = (TreeNode)Root;
-            string Sign = IsNegative(Node.Value) ? NegateOperation[Node.Value] : Node.Value;
-            List<Tree> MultiNodes = new List<Tree>();
-            List<bool> MultiSigns = new List<bool>();
-            ToMultiNodeTree(Node, Sign, MultiNodes, MultiSigns);
 
-            TreeMultiNode CurrentMulti = new(Sign, MultiNodes, MultiSigns);
+            TreeMultiNode CurrentMulti = Node.ToTreeMultiNode();
             Root = OptimizeConstants(CurrentMulti);
 
             Root = ToTreeNodeTree(CurrentMulti);
@@ -108,9 +105,24 @@ public class TreeBuilder
                 });
             }
         }
+        return Root;
     }
 
-    public List<Token> ToPostfixList(List<Token> Tokens)
+    public static TreeMultiNode ToTreeMultiNode(this TreeNode Node)
+    {
+        string Sign = IsNegative(Node.Value) ? NegateOperation[Node.Value] : Node.Value;
+        List<Tree> MultiNodes = new List<Tree>();
+        List<bool> MultiSigns = new List<bool>();
+        ToMultiNodeTree(Node, Sign, MultiNodes, MultiSigns);
+        return new TreeMultiNode(Sign, MultiNodes, MultiSigns);
+    }
+
+    public static TreeNode ToTreeNode(this TreeMultiNode Node)
+    {
+        return (TreeNode) ToTreeNodeTree(Node);
+    }
+
+    public static List<Token> ToPostfixList(List<Token> Tokens)
     {
         Stack<Token> PostFixStack = new();
         Stack<Token> Stack = new();
@@ -166,7 +178,7 @@ public class TreeBuilder
         return PostFixStack.Reverse().ToList();
     }
 
-    public void ToMultiNodeTree(TreeNode TreeNode, string Sign, List<Tree> MultiNodes, List<bool> MultiSigns, bool Negate = false)
+    private static void ToMultiNodeTree(TreeNode TreeNode, string Sign, List<Tree> MultiNodes, List<bool> MultiSigns, bool Negate = false)
     {
         if (TreeNode.Left is TreeNode && Priorities[TreeNode.Left.Value] == Priorities[Sign])
         {
@@ -208,7 +220,7 @@ public class TreeBuilder
         }
     }
 
-    public Tree ToTreeNodeTree(TreeMultiNode Tree)
+    private static Tree ToTreeNodeTree(TreeMultiNode Tree)
     {
         Tree.Sort();
         if (Tree.Values.Count == 0)
@@ -241,7 +253,7 @@ public class TreeBuilder
         }
     }
 
-    public Tree OptimizeConstants(TreeMultiNode Tree)
+    public static Tree OptimizeConstants(TreeMultiNode Tree)
     {
         int Priority = Priorities[Tree.Value];
         double Result = Priority switch
@@ -273,33 +285,25 @@ public class TreeBuilder
             Tree.Signs.RemoveAt(RemoveIndexes[i]);
         }
         bool Sign = true;
-        if (Priority == 1)
+        if (Tree.Values.Count == 1)
         {
-            if (((decimal) Result) == 0 && Tree.Values.Count == 1)
-            {
-                return Tree.Values[0];
-            } else 
-            {
-                Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
-                Tree.Signs.Insert(0, Sign);
-                Sign = Result >= 0;
-            }
-        } else if (Priority == 2)
+            return Tree.Values[0];
+        }
+        if (Priority == 1 && ((decimal)Result) != 0)
         {
-            if (((decimal) Result) == 1 && Tree.Values.Count == 1)
-            {
-                return Tree.Values[0];
-            } else
-            {
-                Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
-                Tree.Signs.Insert(0, Sign);
-            }
+            Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
+            Sign = Result >= 0;
+            Tree.Signs.Insert(0, Sign);
+        } else if (Priority == 2 && ((decimal)Result) != 1)
+        {
+            Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
+            Tree.Signs.Insert(0, Sign);
         }
         return Tree;
         //Tree.Values.Insert(0, true);
     }
 
-    public Tree OptimizeConstants(Tree Tree, bool SeparateNegative = false)
+    public static Tree OptimizeConstants(Tree Tree, bool SeparateNegative = false)
     {
         if (Tree == null)
         {
