@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlgebraicLaws\AlgebraicLaws.csproj" />
+    <ProjectReference Include="..\LexSyntax-Analyzer\LexSyntax-Analyzer.csproj" />
+    <ProjectReference Include="..\ParallelTree-Builder\ParallelTree-Builder.csproj" />
+  </ItemGroup>
+
+</Project>
