@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LexSyntax-Analyzer\LexSyntax-Analyzer.csproj" />
-    <ProjectReference Include="..\ParallelTree-Builder\ParallelTree-Builder.csproj" />
+    <ProjectReference Include="..\ParallelTree-Builder\ParallelTree.csproj" />
   </ItemGroup>
 
   <ItemGroup>

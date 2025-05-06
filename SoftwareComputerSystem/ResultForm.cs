@@ -1,13 +1,17 @@
 using System.ComponentModel;
 using LexSyntax_Analyzer;
-using ParallelTree_Builder;
+using ParallelTree;
 using AlgebraicLaws;
 using System.Diagnostics;
+using TreeNode = ParallelTree.TreeNode;
+using System.Text;
+using System.Xml.Linq;
 
 namespace SoftwareComputerSystem
 {
     public partial class ResultForm : Form
     {
+        Tree ParallelTree;
         private Color BackgroundColour;
         private Color ForeColour;
         private Font FontDefault;
@@ -46,8 +50,10 @@ namespace SoftwareComputerSystem
                 try
                 {
                     ExpressionAnalyzer = new(LawOptimization.Simplify(Box.Text));
-                    Tree ParallelTree = TreeBuilder.Parse(ExpressionAnalyzer);
-                    Debug.WriteLine(ParallelTree != null ? ParallelTree.Print() : "");
+                    ParallelTree = TreeBuilder.Parse(ExpressionAnalyzer);
+                    //Debug.WriteLine(ParallelTree != null ? ParallelTree.Print() : "");
+
+                    ResultBox.Text = ParallelTree != null ? ParallelTree.Print() : "";
                     //ResultBox.Text = 
                     ResultBox.Select(0, ResultBox.Text.Length);
                     //ResultBox.SelectionFont = new Font(Font, FontStyle.Bold);
@@ -109,7 +115,7 @@ namespace SoftwareComputerSystem
 
         private void CalcButton_Click(object sender, EventArgs e)
         {
-            List<TextBox> Fields = new(){ AddCount, AddTicks, SubCount, SubTicks, MulCount, MulTicks, DivCount, DivTicks};
+            List<TextBox> Fields = new(){ AddTicks, SubTicks, MulTicks, DivTicks};
             List<TextBox> ErrorFields = new();
             foreach (var Box in Fields)
             {
@@ -122,23 +128,57 @@ namespace SoftwareComputerSystem
                 MessageBox.Show($"{string.Join(", ", ErrorFields.Select(Box => Box.Name))} TextBox should not have empty fields"
                     .Replace("Add", "'+' ").Replace("Sub", "'-' ").Replace("Mul", "'*' ").Replace("Div", "'/' "), "Error");
             }
-            VectorComputerSystem.OperationsDictionary Counts;
-            VectorComputerSystem.OperationsDictionary Ticks;
-            VectorComputerSystem VCS;
-            try
+            //OperationsDictionary Ticks;
+            Dictionary<string, int> Ticks;
+            //try
+            //{
+            /*Ticks = new(int.Parse(AddTicks.Text),
+                int.Parse(SubTicks.Text), int.Parse(MulTicks.Text), int.Parse(DivTicks.Text));*/
+            Ticks = new Dictionary<string, int>()
             {
-                Counts = new(int.Parse(AddCount.Text),
-                    int.Parse(SubCount.Text), int.Parse(MulCount.Text), int.Parse(DivCount.Text));
-                Ticks = new(int.Parse(AddTicks.Text),
-                    int.Parse(SubTicks.Text), int.Parse(MulTicks.Text), int.Parse(DivTicks.Text));
-                VCS = new(Counts, Ticks);
-            }
-            catch (ArgumentException Exception)
+                ["+"] = int.Parse(AddTicks.Text),
+                ["-"] = int.Parse(SubTicks.Text),
+                ["*"] = int.Parse(MulTicks.Text),
+                ["/"] = int.Parse(DivTicks.Text),
+            };
+            if (ParallelTree is TreeNode)
             {
-                MessageBox.Show(Exception.Message, "Error");
-                return;
+                  
+                int Layers = 5;
+                TreeNode Node = (TreeNode)ParallelTree;
+                ComputerSystem System = new(Layers, Ticks);
+                StringBuilder SB = new StringBuilder();
+                var NormalSim = System.CalculateExpression(Node);
+                var SequentialSim = System.CalculateExpression(Node, true);
+                int TotalActions = NormalSim.Sum(Step => Step.ProcessorActions.Count);
+                int NonIdleActions = NormalSim.Sum(Step => Step.ProcessorActions.Count(Action => !(Action is IdleProcessorAction)));
+                double Acceleration = SequentialSim.Count / NormalSim.Count;
+                double Efficiency = NonIdleActions / TotalActions;
+                SB.AppendLine($"Час послідовного виконання = {SequentialSim.Count}");
+                SB.AppendLine($"Час паралельного виконання = {NormalSim.Count}");
+                SB.AppendLine($"Коефіцієнт прискорення = {Acceleration:F2}");
+                SB.AppendLine($"Коефіцієнт ефективності = {Efficiency:F2}");
+                Node.Traverse(Node => { SB.AppendLine($"{Node.GetHashCode():X8} : {Node.Value}"); });
+                SB.Append("   T   R |");
+                for (int i = 0; i < Layers; i++)
+                {
+                    SB.Append($"S{i + 1}\t\t");
+                }
+                SB.AppendLine("| W");
+                for (int i = 0; i < NormalSim.Count; i++)
+                {
+                    SB.AppendLine($"{i + 1,4} {NormalSim[i]}");
+                }
+                ResultBox.Text = SB.ToString();
+                //ComputerSystem System = new(16, Ticks);
+                //ResultBox.Text = System.SimulateWork(Node);
             }
-
+            //}
+            //catch (ArgumentException Exception)
+            //{
+            //    MessageBox.Show(Exception.Message, "Error");
+            //    return;
+            //}
         }
     }
 }

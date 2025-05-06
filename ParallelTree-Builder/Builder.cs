@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using LexSyntax_Analyzer;
 
-namespace ParallelTree_Builder
+namespace ParallelTree
 {
     public partial class Builder : Form
     {

@@ -1,4 +1,4 @@
-namespace ParallelTree_Builder;
+namespace ParallelTree;
 
 static class Program
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using LexSyntax_Analyzer;
-using ParallelTree_Builder;
+using ParallelTree;
 
 namespace AlgebraicLaws
 {

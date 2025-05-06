@@ -1,7 +1,7 @@
 using System.Text;
 using LexSyntax_Analyzer;
 
-namespace ParallelTree_Builder;
+namespace ParallelTree;
 
 public class TreeNode: Tree {
 
@@ -34,6 +34,16 @@ public class TreeNode: Tree {
             _Right = value;
         }
     }
+    public int Depth { get
+        {
+            if (Left is TreeValue && Right is TreeValue) {
+                return 0;
+            }
+            int LeftValue = Left is TreeValue ? 0 : ((TreeNode) Left).Depth;
+            int RightValue = Right is TreeValue ? 0 : ((TreeNode)Right).Depth;
+            return Math.Max(LeftValue, RightValue) + 1;
+        }
+    }
 
     public TreeNode(string Value, Tree Left, Tree Right)
     {
@@ -45,6 +55,7 @@ public class TreeNode: Tree {
     public override string ToString()
     {
         return Value;
+        //return $"{this.GetHashCode():X8}";
     }
     
 
@@ -86,4 +97,5 @@ public class TreeNode: Tree {
             ((TreeNode) Right).Traverse(Func);
         }
     }
+
 }

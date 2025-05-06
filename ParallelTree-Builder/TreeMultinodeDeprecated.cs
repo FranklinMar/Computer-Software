@@ -1,6 +1,6 @@
 using LexSyntax_Analyzer;
 
-namespace ParallelTree_Builder;
+namespace ParallelTree;
 
 public class TreeMultinodeDeprecated {
     // private string _Value { get; set ; }

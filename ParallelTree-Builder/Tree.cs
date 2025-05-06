@@ -1,6 +1,6 @@
 ﻿using LexSyntax_Analyzer;
 using System.Text;
-namespace ParallelTree_Builder
+namespace ParallelTree
 {
     public abstract class Tree
     {

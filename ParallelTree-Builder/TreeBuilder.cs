@@ -2,14 +2,14 @@ using System.Data;
 using System.Diagnostics;
 using LexSyntax_Analyzer;
 
-namespace ParallelTree_Builder;
+namespace ParallelTree;
 
 public static class TreeBuilder
 {
     //private SyntaxAnalyzer Analyzer;
     //public Tree Root { get; private set; }
 
-    private static Dictionary<string, int> Priorities = new()
+    public static Dictionary<string, int> OperationPriorities = new()
     {
         { "^", 3 },
         { "*", 2 },
@@ -18,8 +18,8 @@ public static class TreeBuilder
         { "+", 1 },
         { "-", 1 }
     };
-    private static string Negatives = "-/";
-    private static Dictionary<string, string> NegateOperation = new()
+    public static string Negatives = "-/";
+    public static Dictionary<string, string> NegateOperation = new()
     {
         { "+", "-" },
         { "-", "+" },
@@ -79,7 +79,7 @@ public static class TreeBuilder
             return Root;
         }
         Root = OptimizeConstants(Root);
-        if (Root is TreeNode && Priorities[((TreeNode)Root).Value] <= 2)
+        if (Root is TreeNode && OperationPriorities[((TreeNode)Root).Value] <= 2)
         {
             TreeNode Node = (TreeNode)Root;
 
@@ -154,8 +154,8 @@ public static class TreeBuilder
                     while (Stack.Count > 0)
                     {
                         StackToken = Stack.Pop();
-                        if (Priorities.GetValueOrDefault(StackToken.Value, -1) >=
-                            Priorities.GetValueOrDefault(Token.Value, -1))
+                        if (OperationPriorities.GetValueOrDefault(StackToken.Value, -1) >=
+                            OperationPriorities.GetValueOrDefault(Token.Value, -1))
                         {
                             PostFixStack.Push(StackToken);
                         }
@@ -180,7 +180,7 @@ public static class TreeBuilder
 
     private static void ToMultiNodeTree(TreeNode TreeNode, string Sign, List<Tree> MultiNodes, List<bool> MultiSigns, bool Negate = false)
     {
-        if (TreeNode.Left is TreeNode && Priorities[TreeNode.Left.Value] == Priorities[Sign])
+        if (TreeNode.Left is TreeNode && OperationPriorities[TreeNode.Left.Value] == OperationPriorities[Sign])
         {
             ToMultiNodeTree((TreeNode)TreeNode.Left, Sign, MultiNodes, MultiSigns, Negate);
         }
@@ -192,9 +192,9 @@ public static class TreeBuilder
             List<bool> InnerMultiSigns = new();
             ToMultiNodeTree(Node, NewSign, InnerMultiNodes, InnerMultiSigns);
             MultiNodes.Add(new TreeMultiNode(NewSign,InnerMultiNodes, InnerMultiSigns));
-            MultiSigns.Add(Negate);
+            MultiSigns.Add(!Negate);
         }
-        if (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] == Priorities[Sign])
+        if (TreeNode.Right is TreeNode && OperationPriorities[TreeNode.Right.Value] == OperationPriorities[Sign])
         {
             ToMultiNodeTree((TreeNode)TreeNode.Right, Sign, MultiNodes, MultiSigns, IsNegative(TreeNode.Value) ^ Negate);
         }
@@ -208,12 +208,12 @@ public static class TreeBuilder
             MultiNodes.Add(new TreeMultiNode(NewSign, NewMultiOpNodes, NewMultiOpSigns));
             MultiSigns.Add(!(IsNegative(TreeNode.Value) ^ Negate));
         }
-        if (TreeNode.Left is TreeValue || (TreeNode.Left is TreeNode && Priorities[TreeNode.Left.Value] > 2))
+        if (TreeNode.Left is TreeValue || (TreeNode.Left is TreeNode && OperationPriorities[TreeNode.Left.Value] > 2))
         {
             MultiNodes.Insert(0, TreeNode.Left);
             MultiSigns.Insert(0, !Negate);
         }
-        if (TreeNode.Right is TreeValue || (TreeNode.Right is TreeNode && Priorities[TreeNode.Right.Value] > 2))
+        if (TreeNode.Right is TreeValue || (TreeNode.Right is TreeNode && OperationPriorities[TreeNode.Right.Value] > 2))
         {
             MultiNodes.Add(TreeNode.Right);
             MultiSigns.Add(!(IsNegative(TreeNode.Value) ^ Negate));
@@ -235,8 +235,8 @@ public static class TreeBuilder
             return Tree.Values[0];
         } else if (Tree.Values.Count == 2)
         {
-            var LeftNode = Tree.Values[0] is TreeValue ? Tree.Values[0] : ToTreeNodeTree((TreeMultiNode)Tree.Values[0]);
-            var RightNode = Tree.Values[1] is TreeValue ? Tree.Values[1] : ToTreeNodeTree((TreeMultiNode)Tree.Values[1]);
+            var LeftNode = Tree.Values[0] is TreeValue or TreeNode ? Tree.Values[0] : ToTreeNodeTree((TreeMultiNode)Tree.Values[0]);
+            var RightNode = Tree.Values[1] is TreeValue or TreeNode ? Tree.Values[1] : ToTreeNodeTree((TreeMultiNode)Tree.Values[1]);
             return new TreeNode(Tree.Signs[1] ? Tree.Value : NegateOperation[Tree.Value], LeftNode, RightNode);
         }
         int Middle = (Tree.Values.Count + 1) / 2;
@@ -255,7 +255,8 @@ public static class TreeBuilder
 
     public static Tree OptimizeConstants(TreeMultiNode Tree)
     {
-        int Priority = Priorities[Tree.Value];
+        Tree.Sort();
+        int Priority = OperationPriorities[Tree.Value];
         double Result = Priority switch
         {
             1 => 0,
@@ -287,17 +288,20 @@ public static class TreeBuilder
         bool Sign = true;
         if (Tree.Values.Count == 1)
         {
-            return Tree.Values[0];
-        }
-        if (Priority == 1 && ((decimal)Result) != 0)
-        {
-            Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
-            Sign = Result >= 0;
-            Tree.Signs.Insert(0, Sign);
-        } else if (Priority == 2 && ((decimal)Result) != 1)
-        {
-            Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
-            Tree.Signs.Insert(0, Sign);
+            if (Priority == 1 && ((decimal)Result) != 0)
+            {
+                Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
+                Sign = Result >= 0;
+                Tree.Signs.Insert(0, Sign);
+            }
+            else if (Priority == 2 && ((decimal)Result) != 1)
+            {
+                Tree.Values.Insert(0, new TreeValue(Math.Abs((decimal)Result).ToString("G29")));
+                Tree.Signs.Insert(0, Sign);
+            } else
+            {
+                return Tree.Values[0];
+            }
         }
         return Tree;
         //Tree.Values.Insert(0, true);

@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AlgebraicLaws\AlgebraicLaws.csproj" />
     <ProjectReference Include="..\LexSyntax-Analyzer\LexSyntax-Analyzer.csproj" />
-    <ProjectReference Include="..\ParallelTree-Builder\ParallelTree-Builder.csproj" />
+    <ProjectReference Include="..\ParallelTree-Builder\ParallelTree.csproj" />
   </ItemGroup>
 
 </Project>

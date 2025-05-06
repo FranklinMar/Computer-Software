@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using LexSyntax_Analyzer;
 
-namespace ParallelTree_Builder
+namespace ParallelTree
 {
     public class TreeMultiNode: Tree
     {
@@ -50,7 +50,7 @@ namespace ParallelTree_Builder
             int i = Begin - 1;
             for (int j = Begin; j < End; j++)
             {
-                if (Signs[j] != LastBool) // (Values[j] <= Last)
+                if ((Signs[j] ? 1 : 0) > (LastBool ? 1 : 0)) // (Values[j] <= Last)
                 {
                     i++;
                     Exchange(Values, Signs, i, j);
