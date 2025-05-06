@@ -1,8 +1,7 @@
-﻿    using ParallelTree;
-    using TreeNode = ParallelTree.TreeNode;
+﻿using ParallelTree;
+using TreeNode = ParallelTree.TreeNode;
 using static MathNet.Symbolics.VisualExpression;
 using System.Xml.Linq;
-using static SoftwareComputerSystem.PipelineProcessor.ExecutionEvent;
 using System.   Text;
 using MathNet.Numerics.LinearRegression;
 using System.Configuration;
@@ -10,131 +9,7 @@ using System.Configuration;
 
 namespace SoftwareComputerSystem
 {
-    [Serializable]
-    public class CalculationLayer
-    {
-        /*public enum CalcState {
-            Idle, Calculating
-        }*/
-        public int CalculatingTick = 0;
-        public TreeNode? Node { get; set; }
-        public bool IsIdle { get => Node == null; }
-        public Dictionary<string, int> durations;
-        public Dictionary<string, int> Durations {
-            get => durations;
-            set
-            {
-                if (value.Values.Any(Value => Value <= 0))
-                {
-                    throw new ArgumentException("Operation duration must be greater than 0");
-                }
-                durations = value;
-            }
-        }
-        //public CalcState State { get => Node == null ? CalcState.Idle : CalcState.Calculating; }
-        public ProcessorAction State { get => Node == null ? new IdleProcessorAction() : new CalculatingProcessorAction(Node); }
-        public CalculationLayer (Dictionary<string, int> OpDurations, TreeNode? node = null) 
-        {
-            Node = node;
-            Durations = OpDurations;
-        }
 
-        public TreeNode? Calculate()
-        {
-            if (Node != null)
-            {
-                CalculatingTick += 1;
-                if (CalculatingTick == Durations[Node.Value])
-                {
-                    CalculatingTick = 0;
-                    TreeNode node = Node;
-                    Node = null;
-                    return node;
-                }
-            }
-            return null;
-        }
-
-        public override string ToString()
-        {
-            if (Node == null)
-            {
-                return "";
-            }
-            return $"{GetHashCode():X8}";
-        }
-        
-        public CalculationLayer Clone()
-        {
-            return new(Durations, Node);
-        }
-    }
-
-    public class SimulationStep
-    {
-        //public KeyValuePair<TreeNode, string>? Reading { get; set; }
-        public TreeNode? Reading { get; set; }
-        public TreeNode? Writing { get; set; }
-        //public KeyValuePair<TreeNode, string>? Writing { get; set; }
-        public List<ProcessorAction> ProcessorActions { get; set;  }
-
-        public SimulationStep(List<ProcessorAction>? Actions = null/*int Layers*/)
-        {
-            if (Actions == null)
-            {
-                Actions = new List<ProcessorAction>();
-            }
-            ProcessorActions = Actions;
-            //if (Layers <= 0)
-            //{
-            //    throw new ArgumentException("Number of layers cannot be 0 or lower");
-            //}
-            //ProcessorActions = Enumerable.Repeat<ProcessorAction>(new IdleProcessorAction(), Layers).ToList();
-        }
-
-        /*public string? Operation
-        {
-            get
-            {
-                if (ProcessorActions.All(p => p is IdleProcessorAction))
-                    return null;
-
-                var calculatingAction = ProcessorActions.FirstOrDefault(p => p is CalculatingProcessorAction) as CalculatingProcessorAction;
-                return calculatingAction?.Node.Value;
-            }
-        }*/
-
-        public override string ToString()
-        {
-            //string readingStr = Reading.HasValue ? Reading.Value.Value : "";
-            //string writingStr = Writing.HasValue ? Writing.Value.Value : "";
-            string readingStr = Reading == null ? "\t" : Reading.Value;
-            string writingStr = Writing == null ? "\t" : Writing.Value;
-            return $"{readingStr,4} | {string.Join(" ", ProcessorActions)} | {writingStr}";
-        }
-    }
-
-    public interface ProcessorAction
-    {
-        //public override string ToString();
-    }
-
-    public class IdleProcessorAction : ProcessorAction
-    {
-        public override string ToString() => new('\t', 2);
-    }
-
-    public class CalculatingProcessorAction : ProcessorAction
-    {
-        public TreeNode Node { get; }
-
-        public CalculatingProcessorAction(TreeNode node)
-        {
-            Node = node;
-        }
-
-        public override string ToString() => $"{Node.GetHashCode():X8}";
-    }
     public class ComputerSystem
     {
         private int CurrentStep = 0;
@@ -147,11 +22,10 @@ namespace SoftwareComputerSystem
             {
                 throw new ArgumentException("Number of layers cannot be 0 or lower");
             }
-            /*if (!OperationDurations.All(Operation => Operation.Value > 0))
+            if (!OperationDurations.All(Operation => Operation.Value > 0))
             {
                 throw new ArgumentException("All operations durations must be greater than zero");
-            }*/
-            //this.Layers = Enumerable.Repeat<CalculationLayer>(new CalculationLayer(OperationDurations), Layers).ToList();
+            }
             this.Layers = new();
             for (int i = 0; i < Layers; i++)
             {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SoftwareComputerSystem
 {
-    /*public class GenericLayer : CalculationLayer
+    public class GenericLayer //: CalculationLayer
     {
         public string Operation { get; private set;}
         public GenericLayer(string Operation)
@@ -42,5 +42,5 @@ namespace SoftwareComputerSystem
 
             return new TreeNode(Node.Value, Node.Left, Node.Right);
         }
-    }*/
+    }
 }
